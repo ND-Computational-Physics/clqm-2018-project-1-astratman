@@ -41,21 +41,38 @@ class Solver:
         self.xmax = xmax
         self.n_steps = n_steps
         
-    def matrix_element_finder(i,j):
-    """
-    """
+    def matrix_element_finder(self,i,j): 
+        """
+        Calculates the i-jth element of the matrix
+        All elements are nonzero except diagonal and off-diagonal elements
+        """
+        h = (self.xmax-self.xmin)/self.n_steps
+        if i == j:
+            #Potential is evaluated at discrete points
+            #Python's indexing starts at 0
+            #Indexing of matrix elements starts at 1
+            #Need to use [i-1] in finding point to evaluate potential at
+            Element = 2/(h**2) + self.potential(xPoints[i-1])
+        elif i == j + 1:
+            Element = -1/(h**2)
+        elif j == i + 1:
+            Element = -1/(h**2)
+        else:
+            Element = 0
+        return Element
+            
+    def matrix_maker(): 
+    """ 
+        Creates a tridiagonal matrix
+    """ 
         h = (xmax-xmin)/n_steps
         for i in range(1, n_steps-1):
-            ""
-            
-    def matrix_maker():
-    """
-    """
-        ""
+            for j in range(1, n_steps-1):
+                return matrix_element_finder(i,j)
         
     def matrix_solver():
     """
     """
-        ""
+        np.linalg.eig("""whatever matrix maker returns""")
 
 """Define variables"""
