@@ -24,5 +24,38 @@ Tests:
 """
 import numpy as np
 
-"""Define variables"""
+"""def nlsSolver(potential, xmin, xmax, n_steps):
 
+   note: n_steps = basis dimension + 1 
+
+
+        ""
+"""
+        
+class Solver:
+"""
+"""
+    def __init__(self, potential, xmin, xmax, n_steps):
+        self.potential = potential
+        self.xmin = xmin
+        self.xmax = xmax
+        self.n_steps = n_steps
+        
+    def matrix_element_finder(i,j):
+    """
+    """
+        h = (xmax-xmin)/n_steps
+        for i in range(1, n_steps-1):
+            ""
+            
+    def matrix_maker():
+    """
+    """
+        ""
+        
+    def matrix_solver():
+    """
+    """
+        ""
+
+"""Define variables"""
