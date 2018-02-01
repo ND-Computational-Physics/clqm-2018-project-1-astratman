@@ -23,14 +23,6 @@ Tests:
 
 """
 import numpy as np
-
-"""def nlsSolver(potential, xmin, xmax, n_steps):
-
-   note: n_steps = basis dimension + 1 
-
-
-        ""
-"""
         
 class Solver:
 """
@@ -61,10 +53,6 @@ class Solver:
             Element = 0
         return Element
             
-    def matrix_maker(): 
-    """ 
-        Creates a tridiagonal matrix
-    """ 
     def matrix_maker(self):
     """
     Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
@@ -82,4 +70,3 @@ class Solver:
     def matrix_solver(self):
     """
     """
-        ""
