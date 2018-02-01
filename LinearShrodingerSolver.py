@@ -65,14 +65,21 @@ class Solver:
     """ 
         Creates a tridiagonal matrix
     """ 
-        h = (xmax-xmin)/n_steps
-        for i in range(1, n_steps-1):
-            for j in range(1, n_steps-1):
-                return matrix_element_finder(i,j)
+    def matrix_maker(self):
+    """
+    Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
+    
+    Returns:
+    a (numpy array) - The matrix with elements formed by matrix_element_finder
+    """
+        a = np.zeros((self.n_steps,self.n_steps))
+        for i in range(0, self.n_steps-1):
+            for j in range(0, self.n_steps-1):
+                a[i][j] = matrix_element_finder(i,j)
+        return a
         
-    def matrix_solver():
-    """
-    """
-        np.linalg.eig("""whatever matrix maker returns""")
 
-"""Define variables"""
+    def matrix_solver(self):
+    """
+    """
+        ""
