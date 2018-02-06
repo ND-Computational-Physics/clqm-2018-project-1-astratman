@@ -26,8 +26,7 @@ import numpy as np
 import matplotlib.pyplot as plt
         
 class Solver:
-"""
-"""
+
     def __init__(self, potential, xmin, xmax, n_steps):
         """
         Variables:
@@ -43,9 +42,9 @@ class Solver:
         self.n_steps = n_steps
         
         self.h = (self.xmax-self.xmin)/self.n_steps
-        self.xPoints = np.zeroes(0,n_steps-1)
+        self.xPoints = np.zeros(n_steps-1)
         for i in range(0, n_steps-1):
-            xPoints[i] = i*self.h + self.xmin
+            self.xPoints[i] = i*self.h + self.xmin
 
         
     def matrix_element_finder(self,i,j): 
@@ -56,39 +55,49 @@ class Solver:
 
         if i == j:
             #Potential is evaluated at discrete points
-            Element = 2/(h**2) + self.potential(xPoints[i])
+            Element = 2/(self.h**2) + self.potential(self.xPoints[i])
         elif i == j + 1:
-            Element = -1/(h**2)
+            Element = -1/(self.h**2)
         elif j == i + 1:
-            Element = -1/(h**2)
+            Element = -1/(self.h**2)
         else:
             Element = 0
         return Element
 
     def matrix_maker(self):
-    """
+        """
     Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
     
     Returns:
     a (numpy array) - The matrix with elements formed by matrix_element_finder
-    """
+        """
         self.a = np.zeros((self.n_steps,self.n_steps))
         for i in range(0, self.n_steps-1):
             for j in range(0, self.n_steps-1):
-                a[i][j] = matrix_element_finder(i,j)
+                self.a[i][j] = self.matrix_element_finder(i,j)
         
 
     def matrix_solver(self):
-    """
+        """
     Diagonalizes the matrix
 
     Returns:
     numpy array of eigenvalues - energies
     numpy array of eigenvectors - values of wavefunction corresponding to each energy
-    """
-        self.eigenvalues, self.eigenvectors = np.linalg.eig(a)
+        """
+        self.eigenvalues, self.eigenvectors = np.linalg.eig(self.a)
 
-
+if (__name__ == "__main__"):
+    def square_well_potential(x):
+        return 0
+        
+    squareWell = Solver(square_well_potential, -5,5,10)
+    
+    squareWell.matrix_maker()
+    squareWell.matrix_solver()
+    
+    print(squareWell.eigenvalues)
+    print(squareWell.eigenvectors)
 
 
 
