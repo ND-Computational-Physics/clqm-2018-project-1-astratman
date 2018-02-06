@@ -28,17 +28,31 @@ class Solver:
 """
 """
     def __init__(self, potential, xmin, xmax, n_steps):
+        """
+        Variables:
+        self (obj)
+        potential(function)
+        xmin(float)
+        xmax(float)
+        n_steps(int)
+        """
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
+        
+        self.h = (self.xmax-self.xmin)/self.n_steps
+        self.xPoints = np.zeroes(0,n_steps-1)
+        for i in range(0, n_steps-1):
+            xPoints[i] = i*self.h + self.xmin
+
         
     def matrix_element_finder(self,i,j): 
         """
         Calculates the i-jth element of the matrix
         All elements are nonzero except diagonal and off-diagonal elements
         """
-        h = (self.xmax-self.xmin)/self.n_steps
+
         if i == j:
             #Potential is evaluated at discrete points
             #Python's indexing starts at 0
@@ -60,11 +74,10 @@ class Solver:
     Returns:
     a (numpy array) - The matrix with elements formed by matrix_element_finder
     """
-        a = np.zeros((self.n_steps,self.n_steps))
+        self.a = np.zeros((self.n_steps,self.n_steps))
         for i in range(0, self.n_steps-1):
             for j in range(0, self.n_steps-1):
                 a[i][j] = matrix_element_finder(i,j)
-        return a
         
 
     def matrix_solver(self):
