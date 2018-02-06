@@ -99,8 +99,6 @@ if (__name__ == "__main__"):
     print(squareWell.eigenvalues)
     print(squareWell.eigenvectors)
 
-if __name__ == "__main__":
-    potential 
 
 
 
