@@ -23,14 +23,6 @@ Tests:
 
 """
 import numpy as np
-
-"""def nlsSolver(potential, xmin, xmax, n_steps):
-
-   note: n_steps = basis dimension + 1 
-
-
-        ""
-"""
         
 class Solver:
 """
@@ -78,4 +70,3 @@ class Solver:
     def matrix_solver(self):
     """
     """
-        ""
