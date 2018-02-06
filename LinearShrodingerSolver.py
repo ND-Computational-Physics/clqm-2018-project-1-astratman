@@ -23,6 +23,7 @@ Tests:
 
 """
 import numpy as np
+import matplotlib.pyplot as plt
         
 class Solver:
 """
@@ -41,10 +42,7 @@ class Solver:
         h = (self.xmax-self.xmin)/self.n_steps
         if i == j:
             #Potential is evaluated at discrete points
-            #Python's indexing starts at 0
-            #Indexing of matrix elements starts at 1
-            #Need to use [i-1] in finding point to evaluate potential at
-            Element = 2/(h**2) + self.potential(xPoints[i-1])
+            Element = 2/(h**2) + self.potential(xPoints[i])
         elif i == j + 1:
             Element = -1/(h**2)
         elif j == i + 1:
@@ -69,4 +67,18 @@ class Solver:
 
     def matrix_solver(self):
     """
+    Diagonalizes the matrix
+
+    Returns:
+    numpy array of eigenvalues - energies
+    numpy array of eigenvectors - values of wavefunction corresponding to each energy
     """
+        self.eigenvalues, self.eigenvectors = np.linalg.eig(a)
+
+
+
+
+
+
+
+
