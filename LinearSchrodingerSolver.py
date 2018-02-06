@@ -43,7 +43,7 @@ class Solver:
         
         self.h = (self.xmax-self.xmin)/self.n_steps
         self.xPoints = np.zeros(n_steps-1)
-        for i in range(0, n_steps-1):
+        for i in range(1, n_steps-2):
             self.xPoints[i] = i*self.h + self.xmin
 
         
@@ -67,11 +67,13 @@ class Solver:
     def matrix_maker(self):
         """
     Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
+
+    Need to leave out first and last points and pad matrix with zeros
     
     Returns:
     a (numpy array) - The matrix with elements formed by matrix_element_finder
         """
-        self.a = np.zeros((self.n_steps,self.n_steps))
+        self.a = np.zeros((self.n_steps-1,self.n_steps-1))
         for i in range(0, self.n_steps-1):
             for j in range(0, self.n_steps-1):
                 self.a[i][j] = self.matrix_element_finder(i,j)
@@ -98,6 +100,8 @@ if (__name__ == "__main__"):
     
     print(squareWell.eigenvalues)
     print(squareWell.eigenvectors)
+
+    plt.plot()
 
 
 
