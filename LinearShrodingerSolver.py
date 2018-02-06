@@ -60,11 +60,7 @@ class Solver:
         else:
             Element = 0
         return Element
-            
-    def matrix_maker(): 
-    """ 
-        Creates a tridiagonal matrix
-    """ 
+
     def matrix_maker(self):
     """
     Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
