@@ -42,8 +42,8 @@ class Solver:
         self.n_steps = n_steps
         
         self.h = (self.xmax-self.xmin)/self.n_steps
-        self.xPoints = np.zeros(n_steps-1)
-        for i in range(1, n_steps-2):
+        self.xPoints = np.zeros(n_steps+1)
+        for i in range(0, n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
 
         
@@ -51,6 +51,8 @@ class Solver:
         """
         Calculates the i-jth element of the matrix
         All elements are nonzero except diagonal and off-diagonal elements
+        
+        Returns: Element (float) - calculated ij-th element of matrix
         """
 
         if i == j:
@@ -73,9 +75,9 @@ class Solver:
     Returns:
     a (numpy array) - The matrix with elements formed by matrix_element_finder
         """
-        self.a = np.zeros((self.n_steps-1,self.n_steps-1))
-        for i in range(0, self.n_steps-1):
-            for j in range(0, self.n_steps-1):
+        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
+        for i in range(0, self.n_steps+1):
+            for j in range(0, self.n_steps+1):
                 self.a[i][j] = self.matrix_element_finder(i,j)
         
 
@@ -89,20 +91,46 @@ class Solver:
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eig(self.a)
 
+def nrg_plot(potential):
+    """
+    Plots the eigenvectors and eigenvalues for a certain hamiltonian.
+    
+    Variables:
+    potential (Solver obj) - an object representing a specific hamiltonian
+    """
+    e_vectors = potential.eigenvectors
+    e_values = potential.eigenvalues
+    
+    #for i in range(0,len(e_vectors)):
+            #plt.plot(potential.xPoints,e_vectors[i])
+            
+    plt.plot(potential.xPoints,e_vectors[1])
+    
+    plt.ylabel('WaveFunction')
+    plt.xlabel('Position')
+    plt.show()
+    
+    
+        
 if (__name__ == "__main__"):
     def square_well_potential(x):
         return 0
         
-    squareWell = Solver(square_well_potential, -5,5,10)
+    squareWell = Solver(square_well_potential, -1,1,1000)
     
     squareWell.matrix_maker()
     squareWell.matrix_solver()
     
+    print(squareWell.xPoints)
     print(squareWell.eigenvalues)
     print(squareWell.eigenvectors)
 
-    plt.plot()
-
+    print('buffer line')
+    
+    #print(squareWell.eigenvectors[0][0])
+    nrg_plot(squareWell)
+    
+    
 
 
 
