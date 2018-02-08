@@ -107,12 +107,11 @@ def nrg_plot(psi):
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
     plt.show()
-    
-    
+
+
         
 if (__name__ == "__main__"):
-    
-   
+
     def square_well_potential(x):
         return 0
 
