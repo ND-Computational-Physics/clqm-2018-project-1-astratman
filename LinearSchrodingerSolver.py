@@ -57,7 +57,7 @@ class Solver:
 
         if i == j:
             #Potential is evaluated at discrete points
-            Element = 2/(self.h**2) + self.potential(self.xPoints[i-1])
+            Element = 2/(self.h**2) + self.potential(self.xPoints[i])
         elif i == j + 1:
             Element = -1/(self.h**2)
         elif j == i + 1:
@@ -76,8 +76,8 @@ class Solver:
     a (numpy array) - The matrix with elements formed by matrix_element_finder
         """
         self.a = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1, self.n_steps+1):
-            for j in range(1, self.n_steps+1):
+        for i in range(1, self.n_steps):
+            for j in range(1, self.n_steps):
                 self.a[i][j] = self.matrix_element_finder(i,j)
         
 
@@ -103,6 +103,8 @@ def nrg_plot(psi):
             #plt.plot(potential.xPoints,e_vectors[i])
             
     plt.plot(psi.xPoints,psi.eigenvectors[1])
+    plt.plot(psi.xPoints,psi.eigenvectors[2])
+    plt.plot(psi.xPoints,psi.eigenvectors[3])
     
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
@@ -116,10 +118,10 @@ if (__name__ == "__main__"):
         return 0
 
     def ho_potential(x):
-        return x*x
+        return -x**2
         
-    squareWell = Solver(square_well_potential, 0,100,1000)
-    hOscillator = Solver(ho_potential,0,100,1000)
+    squareWell = Solver(square_well_potential, 0,1,1000)
+    hOscillator = Solver(ho_potential,0,1,1000)
     
     squareWell.matrix_maker()
     squareWell.matrix_solver()
@@ -132,7 +134,7 @@ if (__name__ == "__main__"):
     #print(squareWell.eigenvectors)
 
     print('buffer line')
-    
+    print(hOscillator.xPoints)
     print(squareWell.a)
     print(hOscillator.a)
     #print(squareWell.eigenvectors[0][0])
