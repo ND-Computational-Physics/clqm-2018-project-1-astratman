@@ -88,19 +88,10 @@ class Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
-        #Tried normalization, but it seems unnecessary here, or I did something incorrectly.
-        """   
+        #Normalization of the eigenvectors
         for i in range(0, len(self.eigenvectors)):
-            A=0
-            for j in range(0, len(self.eigenvectors[i])):
-                A += self.eigenvectors[i][j]**2
-            A = np.sqrt(A)
-            print(A)
-            print(A*self.h)
-            self.eigenvectors[i] = (1/(A)) * self.eigenvectors[i]
-        """
+            self.eigenvectors[i] = (1/np.sqrt(h)) * self.eigenvectors[i]
         
-
 def nrg_plot(psi, n, m = None):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
