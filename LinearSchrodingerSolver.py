@@ -43,7 +43,7 @@ class Solver:
         
         self.h = (self.xmax-self.xmin)/self.n_steps
         self.xPoints = np.zeros(n_steps+1)
-        for i in range(0, n_steps+1):
+        for i in range(n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
 
         
@@ -57,7 +57,7 @@ class Solver:
 
         if i == j:
             #Potential is evaluated at discrete points
-            Element = 2/(self.h**2) + self.potential(self.xPoints[i])
+            Element = 2/(self.h**2) + self.potential(self.xPoints[i-1])
         elif i == j + 1:
             Element = -1/(self.h**2)
         elif j == i + 1:
@@ -76,8 +76,8 @@ class Solver:
     a (numpy array) - The matrix with elements formed by matrix_element_finder
         """
         self.a = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(0, self.n_steps+1):
-            for j in range(0, self.n_steps+1):
+        for i in range(1,self.n_steps+1):
+            for j in range(1,self.n_steps+1):
                 self.a[i][j] = self.matrix_element_finder(i,j)
         
 
@@ -116,7 +116,7 @@ if (__name__ == "__main__"):
     def square_well_potential(x):
         return 0
         
-    squareWell = Solver(square_well_potential, -1,1,1000)
+    squareWell = Solver(square_well_potential, 0,1,1000)
     
     squareWell.matrix_maker()
     squareWell.matrix_solver()
