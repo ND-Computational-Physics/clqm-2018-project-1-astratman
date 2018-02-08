@@ -1,4 +1,4 @@
-"""Solves Schrodinger equation
+"""Solves One-Dimensional Time Independent Schrodinger equation
 
 Anne Stratman
 Ben Riordan
@@ -92,7 +92,6 @@ class Solver:
         for i in range(1, self.n_steps):
             for j in range(1, self.n_steps):
                 self.a[i][j] = self.matrix_element_finder(i,j)
-        
 
     def matrix_solver(self):
         """
@@ -128,7 +127,7 @@ def nrg_plot(psi, n, m = None):
     plt.xlabel('Position')
     plt.show()
 
-def run(p_function, xmin, xmax, dim, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -138,62 +137,43 @@ def run(p_function, xmin, xmax, dim, n, m = None, x_points = None, e_values = No
     xmax (float) - right bound of positions
     dim (int) - number of increments when evaluating the wavefunctions
     n (int) - lower bound of eigenvectors to plot
+    
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
     x_points (bool) [OPTIONAL] - if True, prints the xPoints array
-    
+    e_values(bool) [OPTIONAL] - if True, prints the eigenvalues array
+    e_vectors(bool) [OPTIONAL] - if True, prints the eigenvectors array
+    hamiltonian(bool) [OPTIONAL] - if True, prints the a array
     """
-    potential = Solver(p_function, xmin, xmax, dim)
+    potential = Solver(p_function, xmin, xmax, dim, mass)
     
     potential.matrix_maker()
     potential.matrix_solver()
     
-    if x_points != None:
+    if x_points == True:
         print(potential.xPoints)
     
-    if e_values != None:
+    if e_values == True:
         print(potential.eigenvalues)
         
-    if e_vectors != None:
+    if e_vectors == True:
         print(potential.eigenvectors)
         
-    if hamiltonian != None:
+    if hamiltonian == True:
         print(potential.a)
-        
-    if m == None:
-        nrg_plot(potential, n)
-    else:
-        nrg_plot(potential, n, m)
+
+    nrg_plot(potential, n, m)
    
    
 if (__name__ == "__main__"):
-
+    #Test Case 1: The infinite square well potential
     def square_well_potential(x):
         return 0
 
+    #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
         return -(1/2)*x**2
      
-    run(square_well_potential, 0, 1, 100, 1, e_vectors = True)
-    #squareWell = Solver(square_well_potential, 0, 1, 100)
-    #hOscillator = Solver(ho_potential, 0, 1, 100)
-    
-    #squareWell.matrix_maker()
-    #squareWell.matrix_solver()
-    
-    #hOscillator.matrix_maker()
-    #hOscillator.matrix_solver()
-    
-    #print(squareWell.xPoints)
-    #print(hOscillator.xPoints)
-    
-    #print(squareWell.eigenvalues)
-    #print(hOscillator.eigenvalues)
-    
-    #print(squareWell.eigenvectors)
-    #print(hOscillator.eigenvectors)
+    run(square_well_potential, 0, 1, 100, 511, 1, e_vectors = True)
+    print('buffer line')
+    run(ho_potential, -1, 1, 100, 511, 1, x_points = True, hamiltonian = True)
 
-    #print(squareWell.a)
-    #print(hOscillator.a)
-
-    #nrg_plot(squareWell, 1, 10)
-    #nrg_plot(hOscillator, 1)
