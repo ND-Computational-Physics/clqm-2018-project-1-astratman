@@ -49,7 +49,6 @@ class Solver:
         self.n_steps = n_steps
         self.mass = particle_mass
 
-        
         self.h = (self.xmax-self.xmin)/self.n_steps
         
         self.xPoints = np.zeros(n_steps+1)
@@ -84,9 +83,6 @@ class Solver:
     def matrix_maker(self):
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
-    
-        Returns:
-        a (numpy array) - The matrix with elements formed by matrix_element_finder
         """
         self.a = np.zeros((self.n_steps+1,self.n_steps+1))
         for i in range(1, self.n_steps):
@@ -95,11 +91,7 @@ class Solver:
 
     def matrix_solver(self):
         """
-        Diagonalizes the matrix
-    
-        Returns:
-        numpy array of eigenvalues - energies
-        numpy array of eigenvectors - values of wavefunction corresponding to each energy
+        Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
@@ -173,7 +165,7 @@ if (__name__ == "__main__"):
     def ho_potential(x):
         return -(1/2)*x**2
      
-    run(square_well_potential, 0, 1, 100, 511, 1, e_vectors = True)
+    run(square_well_potential, 0, 1, 100, 511, 1, x_points = True, e_values = True)
     print('buffer line')
-    run(ho_potential, -1, 1, 100, 511, 1, x_points = True, hamiltonian = True)
+    run(ho_potential, -1, 1, 100, 511, 1, x_points = True, e_values = True)
 
