@@ -19,24 +19,36 @@ Steps:
 
 Tests:
 1. Infinite square well
+
+Units:
+hbar = 1
+c = 1
+
+Neutron mass mN*c**2: 938 MeV
+hbar*c = 197 MeV fm
+Units of hbar*c / mN*c**2: MeV fm**2
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
         
 class Solver:
-    def __init__(self, potential, xmin, xmax, n_steps):
+    def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
         """
         Variables:
         self (obj)
         potential(function) - potential function to use in solving the NLS
         xmin(float) - left bound of position
         xmax(float) - right bound of position
-        n_steps(int) - -number of increments in 
+        n_steps(int) - -number of increments in interval
+        particle_mass (float) - mass of particle in keV
         """
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
+        self.mass = particle_mass
+
         
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -53,11 +65,13 @@ class Solver:
         """
         if i == j:
             #Potential is evaluated at discrete points
-            Element = 2/(self.h**2) + self.potential(self.xPoints[i])
+            #hbar = 1
+            #Multiply each term by 1/(2*m)
+            Element = 2/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
         elif i == j + 1:
-            Element = -1/(self.h**2)
+            Element = -1/((self.h**2)*2*self.mass)
         elif j == i + 1:
-            Element = -1/(self.h**2)
+            Element = -1/((self.h**2)*2*self.mass)
         else:
             Element = 0
         return Element
@@ -90,7 +104,7 @@ class Solver:
         
         #Normalization of the eigenvectors
         for i in range(0, len(self.eigenvectors)):
-            self.eigenvectors[i] = (1/np.sqrt(h)) * self.eigenvectors[i]
+            self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
 def nrg_plot(psi, n, m = None):
     """
@@ -120,8 +134,8 @@ if (__name__ == "__main__"):
     def ho_potential(x):
         return -(1/2)*x**2
         
-    squareWell = Solver(square_well_potential, 0,1,100)
-    hOscillator = Solver(ho_potential,0,1,100)
+    squareWell = Solver(square_well_potential, 0,1,100,511)
+    hOscillator = Solver(ho_potential,0,1,100,511)
     
     squareWell.matrix_maker()
     squareWell.matrix_solver()
@@ -141,5 +155,5 @@ if (__name__ == "__main__"):
     #print(squareWell.a)
     #print(hOscillator.a)
 
-    #nrg_plot(squareWell, 1, 10)
-    nrg_plot(hOscillator, 1)
+    nrg_plot(squareWell, 1, 5)
+    nrg_plot(hOscillator, 98, 100)
