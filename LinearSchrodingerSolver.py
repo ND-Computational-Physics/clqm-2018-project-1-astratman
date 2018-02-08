@@ -139,7 +139,6 @@ if (__name__ == "__main__"):
 
     nrg_plot(squareWell, 5)
     nrg_plot(hOscillator, 5)
-    print(np.__version__)
     
     
 
