@@ -19,22 +19,19 @@ Steps:
 
 Tests:
 1. Infinite square well
-
-
 """
 import numpy as np
 import matplotlib.pyplot as plt
         
 class Solver:
-
     def __init__(self, potential, xmin, xmax, n_steps):
         """
         Variables:
         self (obj)
-        potential(function)
-        xmin(float)
-        xmax(float)
-        n_steps(int)
+        potential(function) - potential function to use in solving the NLS
+        xmin(float) - left bound of position
+        xmax(float) - right bound of position
+        n_steps(int) - -number of increments in 
         """
         self.potential = potential
         self.xmin = xmin
@@ -42,10 +39,10 @@ class Solver:
         self.n_steps = n_steps
         
         self.h = (self.xmax-self.xmin)/self.n_steps
+        
         self.xPoints = np.zeros(n_steps+1)
         for i in range(n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
-
         
     def matrix_element_finder(self,i,j): 
         """
@@ -54,7 +51,6 @@ class Solver:
         
         Returns: Element (float) - calculated ij-th element of matrix
         """
-
         if i == j:
             #Potential is evaluated at discrete points
             Element = 2/(self.h**2) + self.potential(self.xPoints[i])
@@ -92,22 +88,38 @@ class Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
 
-def nrg_plot(psi, n):
+def nrg_plot_range(psi, n, m):
     """
-    Plots the eigenvectors and eigenvalues for a certain hamiltonian.
+    Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values.
     
     Variables:
-    potential (Solver obj) - an object representing a specific hamiltonian
+    psi (Solver obj) - an object representing a specific hamiltonian
+    n (integer) - lower bound of eigenvectors to plot
+    m (integer) - upper bound of eigenvectors to plot
     """
     
-    plt.plot(psi.xPoints,psi.eigenvectors[n+1])
+    for i in range(n,m):
+        plt.plot(psi.xPoints,psi.eigenvectors[i+1])
+
+    plt.ylabel('WaveFunction')
+    plt.xlabel('Position')
+    plt.show()
     
+def nrg_plot(psi, n):
+    """
+    Plots the eigenvectors and eigenvalues for a certain hamiltonian for a singular n value.
+    
+    Variables:
+    psi (Solver obj) - an object representing a specific hamiltonian
+    n (integer) - lower bound of eigenvectors to plot
+    """
+    plt.plot(psi.xPoints,psi.eigenvectors[n+1])
+
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
     plt.show()
 
-
-        
+   
 if (__name__ == "__main__"):
 
     def square_well_potential(x):
@@ -130,19 +142,12 @@ if (__name__ == "__main__"):
     
     #print(squareWell.eigenvalues)
     #print(hOscillator.eigenvalues)
+    
     print(squareWell.eigenvectors)
     #print(hOscillator.eigenvectors)
 
-    
     #print(squareWell.a)
     #print(hOscillator.a)
 
-    nrg_plot(squareWell, 5)
-    nrg_plot(hOscillator, 5)
-    
-    
-
-
-
-
-
+    nrg_plot_range(squareWell, 1, 10)
+    #nrg_plot(hOscillator, 1)
