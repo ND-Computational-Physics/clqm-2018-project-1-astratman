@@ -91,20 +91,18 @@ class Solver:
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eig(self.a)
 
-def nrg_plot(potential):
+def nrg_plot(psi):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian.
     
     Variables:
     potential (Solver obj) - an object representing a specific hamiltonian
     """
-    e_vectors = potential.eigenvectors
-    e_values = potential.eigenvalues
     
     #for i in range(0,len(e_vectors)):
             #plt.plot(potential.xPoints,e_vectors[i])
             
-    plt.plot(potential.xPoints,e_vectors[1])
+    plt.plot(psi.xPoints,psi.eigenvectors[1])
     
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
@@ -116,25 +114,31 @@ if (__name__ == "__main__"):
     
    
     def square_well_potential(x):
-        #if x > xmin and x < xmax:
         return 0
-        #else:
-            #return np.inf
+
+    def ho_potential(x):
+        return x*x
         
-    squareWell = Solver(square_well_potential, 0,1,1000)
+    squareWell = Solver(square_well_potential, 0,100,1000)
+    hOscillator = Solver(ho_potential,0,100,1000)
     
     squareWell.matrix_maker()
     squareWell.matrix_solver()
     
-    print(squareWell.xPoints)
-    print(squareWell.eigenvalues)
-    print(squareWell.eigenvectors)
+    hOscillator.matrix_maker()
+    hOscillator.matrix_solver()
+    
+    #print(squareWell.xPoints)
+    #print(squareWell.eigenvalues)
+    #print(squareWell.eigenvectors)
 
     print('buffer line')
     
     print(squareWell.a)
+    print(hOscillator.a)
     #print(squareWell.eigenvectors[0][0])
     nrg_plot(squareWell)
+    nrg_plot(hOscillator)
     
     
 
