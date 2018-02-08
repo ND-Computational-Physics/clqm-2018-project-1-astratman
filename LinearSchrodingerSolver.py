@@ -19,24 +19,36 @@ Steps:
 
 Tests:
 1. Infinite square well
+
+Units:
+hbar = 1
+c = 1
+
+Neutron mass mN*c**2: 938 MeV
+hbar*c = 197 MeV fm
+Units of hbar*c / mN*c**2: MeV fm**2
+
 """
 import numpy as np
 import matplotlib.pyplot as plt
         
 class Solver:
-    def __init__(self, potential, xmin, xmax, n_steps):
+    def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
         """
         Arguments:
         self (obj)
         potential(function) - potential function to use in solving the NLS
         xmin(float) - left bound of position
         xmax(float) - right bound of position
-        n_steps(int) - -number of increments when evaluating the wavefunctions
+        n_steps(int) - -number of increments in interval
+        particle_mass (float) - mass of particle in keV
         """
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
+        self.mass = particle_mass
+
         
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -58,11 +70,13 @@ class Solver:
         """
         if i == j:
             #Potential is evaluated at discrete points
-            Element = 2/(self.h**2) + self.potential(self.xPoints[i])
+            #hbar = 1
+            #Multiply each term by 1/(2*m)
+            Element = 2/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
         elif i == j + 1:
-            Element = -1/(self.h**2)
+            Element = -1/((self.h**2)*2*self.mass)
         elif j == i + 1:
-            Element = -1/(self.h**2)
+            Element = -1/((self.h**2)*2*self.mass)
         else:
             Element = 0
         return Element
