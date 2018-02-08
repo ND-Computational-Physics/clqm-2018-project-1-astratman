@@ -88,9 +88,8 @@ class Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
-        """
-        Tried normalization, but it seems unnecessary here, or I did something incorrectly.
-        
+        #Tried normalization, but it seems unnecessary here, or I did something incorrectly.
+        """   
         for i in range(0, len(self.eigenvectors)):
             A=0
             for j in range(0, len(self.eigenvectors[i])):
@@ -102,32 +101,20 @@ class Solver:
         """
         
 
-def nrg_plot_range(psi, n, m):
+def nrg_plot(psi, n, m = None):
     """
-    Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values.
+    Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
     
     Variables:
     psi (Solver obj) - an object representing a specific hamiltonian
     n (integer) - lower bound of eigenvectors to plot
     m (integer) - upper bound of eigenvectors to plot
     """
-    
-    for i in range(n,m):
-        plt.plot(psi.xPoints,psi.eigenvectors[i+1])
-
-    plt.ylabel('WaveFunction')
-    plt.xlabel('Position')
-    plt.show()
-    
-def nrg_plot(psi, n):
-    """
-    Plots the eigenvectors and eigenvalues for a certain hamiltonian for a singular n value.
-    
-    Variables:
-    psi (Solver obj) - an object representing a specific hamiltonian
-    n (integer) - lower bound of eigenvectors to plot
-    """
-    plt.plot(psi.xPoints,psi.eigenvectors[n+1])
+    if m == None:
+        plt.plot(psi.xPoints,psi.eigenvectors[n+1])
+    else:
+        for i in range(n,m):
+            plt.plot(psi.xPoints,psi.eigenvectors[i+1])
 
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
@@ -163,5 +150,5 @@ if (__name__ == "__main__"):
     #print(squareWell.a)
     #print(hOscillator.a)
 
-    #nrg_plot_range(squareWell, 1, 10)
+    #nrg_plot(squareWell, 1, 10)
     nrg_plot(hOscillator, 1)
