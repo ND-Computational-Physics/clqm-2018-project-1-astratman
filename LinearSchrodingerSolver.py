@@ -87,6 +87,20 @@ class Solver:
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
+        
+        """
+        Tried normalization, but it seems unnecessary here, or I did something incorrectly.
+        
+        for i in range(0, len(self.eigenvectors)):
+            A=0
+            for j in range(0, len(self.eigenvectors[i])):
+                A += self.eigenvectors[i][j]**2
+            A = np.sqrt(A)
+            print(A)
+            print(A*self.h)
+            self.eigenvectors[i] = (1/(A)) * self.eigenvectors[i]
+        """
+        
 
 def nrg_plot_range(psi, n, m):
     """
@@ -126,7 +140,7 @@ if (__name__ == "__main__"):
         return 0
 
     def ho_potential(x):
-        return -x**2
+        return -(1/2)*x**2
         
     squareWell = Solver(square_well_potential, 0,1,100)
     hOscillator = Solver(ho_potential,0,1,100)
@@ -137,17 +151,17 @@ if (__name__ == "__main__"):
     hOscillator.matrix_maker()
     hOscillator.matrix_solver()
     
-    print(squareWell.xPoints)
+    #print(squareWell.xPoints)
     #print(hOscillator.xPoints)
     
     #print(squareWell.eigenvalues)
     #print(hOscillator.eigenvalues)
     
-    print(squareWell.eigenvectors)
-    #print(hOscillator.eigenvectors)
+    #print(squareWell.eigenvectors)
+    print(hOscillator.eigenvectors)
 
     #print(squareWell.a)
     #print(hOscillator.a)
 
-    nrg_plot_range(squareWell, 1, 10)
-    #nrg_plot(hOscillator, 1)
+    #nrg_plot_range(squareWell, 1, 10)
+    nrg_plot(hOscillator, 1)
