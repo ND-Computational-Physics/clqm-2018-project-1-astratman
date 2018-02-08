@@ -26,12 +26,12 @@ import matplotlib.pyplot as plt
 class Solver:
     def __init__(self, potential, xmin, xmax, n_steps):
         """
-        Variables:
+        Arguments:
         self (obj)
         potential(function) - potential function to use in solving the NLS
         xmin(float) - left bound of position
         xmax(float) - right bound of position
-        n_steps(int) - -number of increments in 
+        n_steps(int) - -number of increments when evaluating the wavefunctions
         """
         self.potential = potential
         self.xmin = xmin
@@ -49,7 +49,12 @@ class Solver:
         Calculates the i-jth element of the matrix
         All elements are nonzero except diagonal and off-diagonal elements
         
-        Returns: Element (float) - calculated ij-th element of matrix
+        Arguments:
+        i (int) - the row of the matrix to calculate
+        j (int) - the column of the matrix to calculate
+        
+        Returns: 
+        Element (float) - calculated ij-th element of matrix
         """
         if i == j:
             #Potential is evaluated at discrete points
@@ -64,12 +69,10 @@ class Solver:
 
     def matrix_maker(self):
         """
-    Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
-
-    Need to leave out first and last points and pad matrix with zeros
+        Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
     
-    Returns:
-    a (numpy array) - The matrix with elements formed by matrix_element_finder
+        Returns:
+        a (numpy array) - The matrix with elements formed by matrix_element_finder
         """
         self.a = np.zeros((self.n_steps+1,self.n_steps+1))
         for i in range(1, self.n_steps):
@@ -79,27 +82,27 @@ class Solver:
 
     def matrix_solver(self):
         """
-    Diagonalizes the matrix
-
-    Returns:
-    numpy array of eigenvalues - energies
-    numpy array of eigenvectors - values of wavefunction corresponding to each energy
+        Diagonalizes the matrix
+    
+        Returns:
+        numpy array of eigenvalues - energies
+        numpy array of eigenvectors - values of wavefunction corresponding to each energy
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
         #Normalization of the eigenvectors
         for i in range(0, len(self.eigenvectors)):
-            self.eigenvectors[i] = (1/np.sqrt(h)) * self.eigenvectors[i]
+            self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
 def nrg_plot(psi, n, m = None):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
     
-    Variables:
+    Arguments:
     psi (Solver obj) - an object representing a specific hamiltonian
-    n (integer) - lower bound of eigenvectors to plot
-    m (integer) - upper bound of eigenvectors to plot
+    n (int) - lower bound of eigenvectors to plot
+    m (int) [OPTIONAL] - upper bound of eigenvectors to plot
     """
     if m == None:
         plt.plot(psi.xPoints,psi.eigenvectors[n+1])
@@ -111,6 +114,42 @@ def nrg_plot(psi, n, m = None):
     plt.xlabel('Position')
     plt.show()
 
+def run(p_function, xmin, xmax, dim, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
+    """
+    Creates a solver object for a potential function and plots the potential function's wavefunction.
+    
+    Arguments:
+    p_function (function) - a potential function
+    xmin (float) - left bound of positions
+    xmax (float) - right bound of positions
+    dim (int) - number of increments when evaluating the wavefunctions
+    n (int) - lower bound of eigenvectors to plot
+    m (int) [OPTIONAL] - upper bound of eigenvectors to plot
+    x_points (bool) [OPTIONAL] - if True, prints the xPoints array
+    
+    """
+    potential = Solver(p_function, xmin, xmax, dim)
+    
+    potential.matrix_maker()
+    potential.matrix_solver()
+    
+    if x_points != None:
+        print(potential.xPoints)
+    
+    if e_values != None:
+        print(potential.eigenvalues)
+        
+    if e_vectors != None:
+        print(potential.eigenvectors)
+        
+    if hamiltonian != None:
+        print(potential.a)
+        
+    if m == None:
+        nrg_plot(potential, n)
+    else:
+        nrg_plot(potential, n, m)
+   
    
 if (__name__ == "__main__"):
 
@@ -119,15 +158,16 @@ if (__name__ == "__main__"):
 
     def ho_potential(x):
         return -(1/2)*x**2
-        
-    squareWell = Solver(square_well_potential, 0,1,100)
-    hOscillator = Solver(ho_potential,0,1,100)
+     
+    run(square_well_potential, 0, 1, 100, 1, e_vectors = True)
+    #squareWell = Solver(square_well_potential, 0, 1, 100)
+    #hOscillator = Solver(ho_potential, 0, 1, 100)
     
-    squareWell.matrix_maker()
-    squareWell.matrix_solver()
+    #squareWell.matrix_maker()
+    #squareWell.matrix_solver()
     
-    hOscillator.matrix_maker()
-    hOscillator.matrix_solver()
+    #hOscillator.matrix_maker()
+    #hOscillator.matrix_solver()
     
     #print(squareWell.xPoints)
     #print(hOscillator.xPoints)
@@ -136,10 +176,10 @@ if (__name__ == "__main__"):
     #print(hOscillator.eigenvalues)
     
     #print(squareWell.eigenvectors)
-    print(hOscillator.eigenvectors)
+    #print(hOscillator.eigenvectors)
 
     #print(squareWell.a)
     #print(hOscillator.a)
 
     #nrg_plot(squareWell, 1, 10)
-    nrg_plot(hOscillator, 1)
+    #nrg_plot(hOscillator, 1)
