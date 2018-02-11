@@ -31,6 +31,7 @@ Units of hbar*c / mN*c**2: MeV fm**2
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy as sc
         
 class Solver:
     def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
@@ -125,6 +126,55 @@ def nrg_plot(psi, n, m = None):
     plt.xlabel('Position')
     plt.show()
 
+def HO_wavefunction(self,x,n):
+    """
+    Defines the harmonic oscillator wavefunction
+    hermval takes two arguments, one of the x point to evaluate at and one of coefficients
+    All the coefficients in hermval are set to 1
+
+    """
+    coeff = np.zeros((self.n_steps,1))
+    for i in range len(coeff):
+        coeff[i] = 1
+
+    psi = self.mass**(1/4) * (1/np.sqrt(2**n)*sc.factorial(n)) * np.polynomial.hermite.hermval(x,coeff) * np.exp(-x**2/2)
+
+def momentum_operator_term(self,i,j):
+    """
+    Finds the term in each matrix element associated with the momentum operator
+    i's are rows, j's are columns
+    """
+    if i == (j+2):
+        ElementM = np.sqrt(j+1)*np.sqrt(j+2)
+    elif i == j:
+        ElementM = -(j+1) - j
+    elif i == (j-2):
+        ElementM = np.sqrt(j)*np.sqrt(j-1)
+    else:
+        ElementM = 0
+    #set hbar = 1, omega = 1
+    return ElementM/4
+
+def potential_operator_term(self):
+    """
+    Finds the term in each matrix element associated with the potential operator
+    """
+
+
+def matrix_maker(self):
+    """
+    Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
+
+    Need to leave out first and last points and pad matrix with zeros
+    
+    Returns:
+    a (numpy array) - The matrix with elements formed by matrix_element_finder
+    """
+        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
+        for i in range(1, self.n_steps):
+            for j in range(1, self.n_steps):
+                self.a[i][j] = self.momentum_operator_term(i,j)
+
    
 if (__name__ == "__main__"):
 
@@ -133,7 +183,8 @@ if (__name__ == "__main__"):
 
     def ho_potential(x):
         return -(1/2)*x**2
-        
+    
+    #electron mass = 511 keV    
     squareWell = Solver(square_well_potential, 0,1,100,511)
     hOscillator = Solver(ho_potential,0,1,100,511)
     
