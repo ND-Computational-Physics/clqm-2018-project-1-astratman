@@ -31,6 +31,7 @@ Units of hbar*c / mN*c**2: MeV fm**2
 """
 import numpy as np
 import matplotlib.pyplot as plt
+import scipy.misc
           
 class Discrete_Solver:
     def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
@@ -122,9 +123,57 @@ class Ho_Solver:
         self.xPoints = np.zeros(n_steps+1)
         for i in range(n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
+
+    def HO_wavefunction(self,x,n):
+        """
+        Defines the harmonic oscillator wavefunction
+        hermval evaluates a Hermite series, so subtracts the value of the (n-1)th series from the value
+            of the nth series to get the value of the nth Hermite polynomial
+        Arguments:
+            x (float): x coordinate to evaluate wavefunction at
+            n (int): index of hermite polynomial and of wavefunction
+        Returns:
+            value of wavefunction (float)
+
+        """
+        coeff1 = np.zeros(n)
+        for i in range(len(coeff1)):
+            coeff1[i] = 1
+
+        coeff2 = np.zeros(n-1)
+        for i in range(len(coeff2)):
+            coeff2[i] = 1
+
+        hermiteValue1 = np.polynomial.hermite.hermval(x,coeff1)
+        hermiteValue2 = np.polynomial.hermite.hermval(x,coeff2)
+        difference = hermiteValue1 - hermiteValue2
+    
+
+        psi = self.mass**(1/4) * (1/np.sqrt(2**n)*scipy.misc.factorial(n)) * difference * np.exp(-x**2/2)
+        return psi
+
+    def momentum_operator_term(self,i,j):
+        """
+        Finds the term in each matrix element associated with the momentum operator
+        i's are rows, j's are columns
+        """
+        if i == (j+2):
+            ElementM = np.sqrt(j+1)*np.sqrt(j+2)
+        elif i == j:
+            ElementM = -(j+1) - j
+        elif i == (j-2):
+            ElementM = np.sqrt(j)*np.sqrt(j-1)
+        else:
+            ElementM = 0
+        #set hbar = 1, omega = 1
+        return ElementM/4
+
+    def potential_operator_term(self):
+        """
+        Finds the term in each matrix element associated with the potential operator
+        """
             
-            
-        def matrix_element_finder(self,i,j): 
+    def matrix_element_finder(self,i,j): 
         """
         Calculates the i-jth element of the matrix
         All elements are nonzero except diagonal and off-diagonal elements
@@ -137,12 +186,12 @@ class Ho_Solver:
         Element (float) - calculated ij-th element of matrix
         """
         
-        def matrix_maker(self):
+    def matrix_maker(self):
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
         
-        def matrix_solver(self):
+    def matrix_solver(self):
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
@@ -168,54 +217,6 @@ def nrg_plot(psi, n, m = None):
     plt.xlabel('Position')
     plt.show()
 
-def HO_wavefunction(self,x,n):
-    """
-    Defines the harmonic oscillator wavefunction
-    hermval takes two arguments, one of the x point to evaluate at and one of coefficients
-    All the coefficients in hermval are set to 1
-
-    """
-    coeff = np.zeros((self.n_steps,1))
-    for i in range len(coeff):
-        coeff[i] = 1
-
-    psi = self.mass**(1/4) * (1/np.sqrt(2**n)*sc.factorial(n)) * np.polynomial.hermite.hermval(x,coeff) * np.exp(-x**2/2)
-
-def momentum_operator_term(self,i,j):
-    """
-    Finds the term in each matrix element associated with the momentum operator
-    i's are rows, j's are columns
-    """
-    if i == (j+2):
-        ElementM = np.sqrt(j+1)*np.sqrt(j+2)
-    elif i == j:
-        ElementM = -(j+1) - j
-    elif i == (j-2):
-        ElementM = np.sqrt(j)*np.sqrt(j-1)
-    else:
-        ElementM = 0
-    #set hbar = 1, omega = 1
-    return ElementM/4
-
-def potential_operator_term(self):
-    """
-    Finds the term in each matrix element associated with the potential operator
-    """
-
-
-def matrix_maker(self):
-    """
-    Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
-
-    Need to leave out first and last points and pad matrix with zeros
-    
-    Returns:
-    a (numpy array) - The matrix with elements formed by matrix_element_finder
-    """
-        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1, self.n_steps):
-            for j in range(1, self.n_steps):
-                self.a[i][j] = self.momentum_operator_term(i,j)
 
 def run(solver = None, p_function, xmin, xmax, dim, mass, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
     """
