@@ -168,53 +168,16 @@ class Ho_Solver:
             ElementM = 0
         #set hbar = 1, omega = 1
         return ElementM/4
-
-    def potential_operator_term(self):
-        """
-        Finds the term in each matrix element associated with the potential operator
-        """
-            
         
-        def HO_wavefunction(self,x,n):
-        """
-        Defines the harmonic oscillator wavefunction
-        hermval takes two arguments, one of the x point to evaluate at and one of coefficients
-        All the coefficients in hermval are set to 1
-        """
-        coeff = np.zeros((self.n_steps,1))
-        for i in range len(coeff):
-            coeff[i] = 1
-        
-        psi = self.mass**(1/4) * (1/np.sqrt(2**n)*sc.factorial(n)) * np.polynomial.hermite.hermval(x,coeff) * np.exp(-x**2/2)
-        return psi
-        
-        def momentum_operator_term(self,i,j):
-        """
-        Finds the term in each matrix element associated with the momentum operator
-        i's are rows, j's are columns
-        """
-        if i == (j+2):
-            ElementM = np.sqrt(j+1)*np.sqrt(j+2)
-        elif i == j:
-            ElementM = -(j+1) - j
-        elif i == (j-2):
-            ElementM = np.sqrt(j)*np.sqrt(j-1)
-        else:
-            ElementM = 0
-            
-        #set hbar = 1, omega = 1
-        return ElementM/4
-        
-        def potential_operator_term(self, i, j):
+    def potential_operator_term(self, i, j):
         """
         Finds the term in each matrix element associated with the potential operator
         """
         v_term = self.HO_wavefunction(i)* self.potential * self.HO_wavefunction(j)
         v_term = integrate.quad(v_term, 0, self.n_steps)
-        
         return v_term
 
-        def matrix_element_finder(self,i,j): 
+    def matrix_element_finder(self,i,j): 
         """
         Calculates the i-jth element of the matrix
         All elements are nonzero except diagonal and off-diagonal elements
