@@ -30,6 +30,7 @@ Units of hbar*c / mN*c**2: MeV fm**2
 
 """
 import numpy as np
+import scipy.integrate as integrate
 import matplotlib.pyplot as plt
           
 class Discrete_Solver:
@@ -123,7 +124,46 @@ class Ho_Solver:
         for i in range(n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
             
+        
+        def HO_wavefunction(self,x,n):
+        """
+        Defines the harmonic oscillator wavefunction
+        hermval takes two arguments, one of the x point to evaluate at and one of coefficients
+        All the coefficients in hermval are set to 1
+        """
+        coeff = np.zeros((self.n_steps,1))
+        for i in range len(coeff):
+            coeff[i] = 1
+        
+        psi = self.mass**(1/4) * (1/np.sqrt(2**n)*sc.factorial(n)) * np.polynomial.hermite.hermval(x,coeff) * np.exp(-x**2/2)
+        return psi
+        
+        def momentum_operator_term(self,i,j):
+        """
+        Finds the term in each matrix element associated with the momentum operator
+        i's are rows, j's are columns
+        """
+        if i == (j+2):
+            ElementM = np.sqrt(j+1)*np.sqrt(j+2)
+        elif i == j:
+            ElementM = -(j+1) - j
+        elif i == (j-2):
+            ElementM = np.sqrt(j)*np.sqrt(j-1)
+        else:
+            ElementM = 0
             
+        #set hbar = 1, omega = 1
+        return ElementM/4
+        
+        def potential_operator_term(self, i, j):
+        """
+        Finds the term in each matrix element associated with the potential operator
+        """
+        v_term = self.HO_wavefunction(i)* self.potential * self.HO_wavefunction(j)
+        v_term = integrate.quad(v_term, 0, self.n_steps)
+        
+        return v_term
+
         def matrix_element_finder(self,i,j): 
         """
         Calculates the i-jth element of the matrix
@@ -141,12 +181,15 @@ class Ho_Solver:
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
+        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
+        for i in range(1, self.n_steps):
+            for j in range(1, self.n_steps):
+                self.a[i][j] = self.momentum_operator_term(i,j)
         
         def matrix_solver(self):
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
-    
     
     
 def nrg_plot(psi, n, m = None):
@@ -168,56 +211,8 @@ def nrg_plot(psi, n, m = None):
     plt.xlabel('Position')
     plt.show()
 
-def HO_wavefunction(self,x,n):
-    """
-    Defines the harmonic oscillator wavefunction
-    hermval takes two arguments, one of the x point to evaluate at and one of coefficients
-    All the coefficients in hermval are set to 1
 
-    """
-    coeff = np.zeros((self.n_steps,1))
-    for i in range len(coeff):
-        coeff[i] = 1
-
-    psi = self.mass**(1/4) * (1/np.sqrt(2**n)*sc.factorial(n)) * np.polynomial.hermite.hermval(x,coeff) * np.exp(-x**2/2)
-
-def momentum_operator_term(self,i,j):
-    """
-    Finds the term in each matrix element associated with the momentum operator
-    i's are rows, j's are columns
-    """
-    if i == (j+2):
-        ElementM = np.sqrt(j+1)*np.sqrt(j+2)
-    elif i == j:
-        ElementM = -(j+1) - j
-    elif i == (j-2):
-        ElementM = np.sqrt(j)*np.sqrt(j-1)
-    else:
-        ElementM = 0
-    #set hbar = 1, omega = 1
-    return ElementM/4
-
-def potential_operator_term(self):
-    """
-    Finds the term in each matrix element associated with the potential operator
-    """
-
-
-def matrix_maker(self):
-    """
-    Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
-
-    Need to leave out first and last points and pad matrix with zeros
-    
-    Returns:
-    a (numpy array) - The matrix with elements formed by matrix_element_finder
-    """
-        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1, self.n_steps):
-            for j in range(1, self.n_steps):
-                self.a[i][j] = self.momentum_operator_term(i,j)
-
-def run(solver = None, p_function, xmin, xmax, dim, mass, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -229,15 +224,21 @@ def run(solver = None, p_function, xmin, xmax, dim, mass, n, m = None, x_points 
     n (int) - lower bound of eigenvectors to plot
     
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
+    solver (int) [OPTIONAL] - defines which solver (basis) to use:
+                                (1) = Discrete Solver
+                                (2) = Harmonic Oscillator Solver
     x_points (bool) [OPTIONAL] - if True, prints the xPoints array
     e_values(bool) [OPTIONAL] - if True, prints the eigenvalues array
     e_vectors(bool) [OPTIONAL] - if True, prints the eigenvectors array
     hamiltonian(bool) [OPTIONAL] - if True, prints the a array
     """
-    if solver == None:
+    if solver == 1:
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
-    else:
+    elif solver == 2:
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass)
+    else:
+        print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
+        return
     
     potential.matrix_maker()
     potential.matrix_solver()
@@ -265,30 +266,7 @@ if (__name__ == "__main__"):
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
         return -(1/2)*x**2
-    
-    #electron mass = 511 keV    
-    squareWell = Solver(square_well_potential, 0,1,100,511)
-    hOscillator = Solver(ho_potential,0,1,100,511)
-    
-    squareWell.matrix_maker()
-    squareWell.matrix_solver()
-    
-    hOscillator.matrix_maker()
-    hOscillator.matrix_solver()
-    
-    #print(squareWell.xPoints)
-    #print(hOscillator.xPoints)
-    
-    #print(squareWell.eigenvalues)
-    #print(hOscillator.eigenvalues)
-    
-    #print(squareWell.eigenvectors)
-    print(hOscillator.eigenvectors)
      
     run(square_well_potential, 0, 1, 100, 511, 1, x_points = True, e_values = True)
     print('buffer line')
     run(ho_potential, -1, 1, 100, 511, 1, x_points = True, e_values = True)
-
-
-    nrg_plot(squareWell, 1, 5)
-    nrg_plot(hOscillator, 98, 100)
