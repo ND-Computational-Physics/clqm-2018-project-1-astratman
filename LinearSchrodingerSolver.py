@@ -31,8 +31,8 @@ Units of hbar*c / mN*c**2: MeV fm**2
 """
 import numpy as np
 import matplotlib.pyplot as plt
-        
-class Solver:
+          
+class Discrete_Solver:
     def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
         """
         Arguments:
@@ -100,6 +100,55 @@ class Solver:
         for i in range(0, len(self.eigenvectors)):
             self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
+class Ho_Solver:
+    def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
+        """
+        Arguments:
+        self (obj)
+        potential(function) - potential function to use in solving the NLS
+        xmin(float) - left bound of position
+        xmax(float) - right bound of position
+        n_steps(int) - -number of increments in interval
+        particle_mass (float) - mass of particle in keV
+        """
+        self.potential = potential
+        self.xmin = xmin
+        self.xmax = xmax
+        self.n_steps = n_steps
+        self.mass = particle_mass
+
+        self.h = (self.xmax-self.xmin)/self.n_steps
+        
+        self.xPoints = np.zeros(n_steps+1)
+        for i in range(n_steps+1):
+            self.xPoints[i] = i*self.h + self.xmin
+            
+            
+        def matrix_element_finder(self,i,j): 
+        """
+        Calculates the i-jth element of the matrix
+        All elements are nonzero except diagonal and off-diagonal elements
+        
+        Arguments:
+        i (int) - the row of the matrix to calculate
+        j (int) - the column of the matrix to calculate
+        
+        Returns: 
+        Element (float) - calculated ij-th element of matrix
+        """
+        
+        def matrix_maker(self):
+        """
+        Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
+        """
+        
+        def matrix_solver(self):
+        """
+        Finds a matrix's eigenvalues and (normalized) eigenvectors
+        """
+    
+    
+    
 def nrg_plot(psi, n, m = None):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
@@ -119,7 +168,7 @@ def nrg_plot(psi, n, m = None):
     plt.xlabel('Position')
     plt.show()
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
+def run(solver = None, p_function, xmin, xmax, dim, mass, n, m = None, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -136,7 +185,10 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, x_points = None, e_value
     e_vectors(bool) [OPTIONAL] - if True, prints the eigenvectors array
     hamiltonian(bool) [OPTIONAL] - if True, prints the a array
     """
-    potential = Solver(p_function, xmin, xmax, dim, mass)
+    if solver == None:
+        potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
+    else:
+        potential = Ho_Solver(p_function, xmin, xmax, dim, mass)
     
     potential.matrix_maker()
     potential.matrix_solver()
