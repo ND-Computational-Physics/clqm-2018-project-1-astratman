@@ -44,12 +44,14 @@ class Discrete_Solver:
         xmax(float) - right bound of position
         n_steps(int) - -number of increments in interval
         particle_mass (float) - mass of particle in keV
+        hbarc is in MeV fm
         """
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
         self.mass = particle_mass
+        self.hbarc = 197
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -71,13 +73,13 @@ class Discrete_Solver:
         """
         if i == j:
             #Potential is evaluated at discrete points
-            #hbar = 1
+            #hbar*c = 197
             #Multiply each term by 1/(2*m)
-            Element = 2/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
+            Element = 2*(self.hbarc**2)/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
         elif i == j + 1:
-            Element = -1/((self.h**2)*2*self.mass)
+            Element = -1*(self.hbarc**2)/((self.h**2)*2*self.mass)
         elif j == i + 1:
-            Element = -1/((self.h**2)*2*self.mass)
+            Element = -1*(self.hbarc**2)/((self.h**2)*2*self.mass)
         else:
             Element = 0
         return Element
@@ -112,12 +114,14 @@ class Ho_Solver:
         xmax(float) - right bound of position
         n_steps(int) - -number of increments in interval
         particle_mass (float) - mass of particle in keV
+        hbarc is in MeV fm
         """
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
         self.mass = particle_mass
+        self.hbarc = 197
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -157,6 +161,7 @@ class Ho_Solver:
         """
         Finds the term in each matrix element associated with the momentum operator
         i's are rows, j's are columns
+        Need to add coefficients
         """
         if i == (j+2):
             ElementM = np.sqrt(j+1)*np.sqrt(j+2)
@@ -280,6 +285,6 @@ if (__name__ == "__main__"):
     def ho_potential(x):
         return -(1/2)*x**2
      
-    run(square_well_potential, 0, 1, 100, 511, 1, x_points = True, e_values = True)
+    run(square_well_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True)
     print('buffer line')
-    run(ho_potential, -1, 1, 100, 511, 1, x_points = True, e_values = True)
+    run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True)
