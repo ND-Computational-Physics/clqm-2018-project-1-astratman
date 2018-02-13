@@ -194,6 +194,8 @@ class Ho_Solver:
         Returns: 
         Element (float) - calculated ij-th element of matrix
         """
+        return self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
+        
         
     def matrix_maker(self):
         """
@@ -208,6 +210,10 @@ class Ho_Solver:
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
+        self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
+        self.eigenvectors = np.transpose(self.eigenvectors)
+        
+        #Normalize the eigenvectors
     
     
 def nrg_plot(psi, n, m = None):
