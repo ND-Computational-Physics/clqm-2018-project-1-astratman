@@ -51,7 +51,6 @@ class Discrete_Solver:
         self.xmax = xmax
         self.n_steps = n_steps
         self.mass = particle_mass
-        self.hbarc = 197
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -75,11 +74,11 @@ class Discrete_Solver:
             #Potential is evaluated at discrete points
             #hbar*c = 197
             #Multiply each term by 1/(2*m)
-            Element = 2*(self.hbarc**2)/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
+            Element = 2/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
         elif i == j + 1:
-            Element = -1*(self.hbarc**2)/((self.h**2)*2*self.mass)
+            Element = -1/((self.h**2)*2*self.mass)
         elif j == i + 1:
-            Element = -1*(self.hbarc**2)/((self.h**2)*2*self.mass)
+            Element = -1/((self.h**2)*2*self.mass)
         else:
             Element = 0
         return Element
@@ -121,7 +120,6 @@ class Ho_Solver:
         self.xmax = xmax
         self.n_steps = n_steps
         self.mass = particle_mass
-        self.hbarc = 197
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -289,7 +287,9 @@ if (__name__ == "__main__"):
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return -(1/2)*x**2
+        #Mass*omega**2 = k
+        #
+        return -(1/2)*x**2/0.511
      
     run(square_well_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True)
     print('buffer line')
