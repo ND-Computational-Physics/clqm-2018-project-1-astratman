@@ -291,6 +291,6 @@ if (__name__ == "__main__"):
         #
         return -(1/2)*x**2/0.511
      
-    run(square_well_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True)
+    #run(square_well_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True)
     print('buffer line')
-    run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True)
+    run(ho_potential, -1, 1, 100, 0.511, 1, 4,x_points = True, e_values = True)
