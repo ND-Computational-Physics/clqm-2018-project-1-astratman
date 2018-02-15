@@ -149,6 +149,19 @@ class Ho_Solver:
             Psi += psi[i]*x**i
         return Psi
 
+    def HO_matrix(self,n_steps,n_functions):
+        """
+        Creates a matrix with different harmonic oscillator wavefunctions evaluated at a vector of xPoints
+        n_steps: rows, each row corresponds to different wavefunctions evaluated at the same point
+        n_functions: columns, each column corresponds to the same wavefunction evaluated at different points
+        """
+        self.b = np.zeros((self.n_steps+1,self.n_functions+1))
+        for i in range(len(xPoints)):
+            x = self.xPoints[i]
+            for j in range(1,n_functions):
+                self.b[i][j] = HO_wavefunction(x,j)
+
+
     def momentum_operator_term(self,i,j):
         """
         Finds the term in each matrix element associated with the momentum operator
@@ -290,7 +303,7 @@ if (__name__ == "__main__"):
         return -(1/2)*x**2/0.511
      
 
-    #run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True
+    run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
     print('buffer line')
     
     #currently, anything above 30 steps takes a very very long time to run
