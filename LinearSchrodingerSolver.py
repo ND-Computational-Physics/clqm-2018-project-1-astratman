@@ -36,7 +36,7 @@ import scipy.misc
 import scipy.special
           
 class Discrete_Solver:
-    def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
+    def __init__(self, potential, xmin, xmax, n_functions, particle_mass):
         """
         Arguments:
         self (obj)
@@ -50,7 +50,8 @@ class Discrete_Solver:
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
-        self.n_steps = n_steps
+        self.n_steps = 100
+        self.n_functions = n_functions
         self.mass = particle_mass
 
         self.h = (self.xmax-self.xmin)/self.n_steps
@@ -88,9 +89,9 @@ class Discrete_Solver:
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
-        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1, self.n_steps):
-            for j in range(1, self.n_steps):
+        self.a = np.zeros((self.n_functions+1,self.n_functions+1))
+        for i in range(1, self.n_functions):
+            for j in range(1, self.n_functions):
                 self.a[i][j] = self.matrix_element_finder(i,j)
 
     def matrix_solver(self):
