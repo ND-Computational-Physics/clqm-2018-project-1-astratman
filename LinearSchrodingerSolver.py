@@ -140,19 +140,6 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        #coeff1 = np.zeros(n)
-        #for i in range(len(coeff1)):
-        #    coeff1[i] = 1
-
-        #coeff2 = np.zeros(n-1)
-        #for i in range(len(coeff2)):
-        #    coeff2[i] = 1
-
-        #hermiteValue1 = np.polynomial.hermite.hermval(x,coeff1)
-        #hermiteValue2 = np.polynomial.hermite.hermval(x,coeff2)
-        #difference = hermiteValue1 - hermiteValue2
-    
-
         psi = self.mass**(1/4) * (1/(np.sqrt(2**n)*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
         return psi
 
@@ -173,13 +160,17 @@ class Ho_Solver:
         #set hbar = 1, omega = 1
         return ElementM/4
         
-    def potential_operator_term(self i, j):
+    def v_term(self, x, i, j):
+        """
+        Creates the function within the integral for each potential term
+        """
+        return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
+        
+    def potential_operator_term(self, x, i, j):
         """
         Finds the term in each matrix element associated with the potential operator
         """
-        v_term = self.HO_wavefunction(i) * self.potential * self.HO_wavefunction(j)
-        v_term = integrate.quad(v_term, self.xim, self.xmax)
-        return v_term
+        return integrate.quad(self.v_term, self.xmin, self.xmax, (i,j))
 
     def matrix_element_finder(self,i,j): 
         """
@@ -193,7 +184,7 @@ class Ho_Solver:
         Returns: 
         Element (float) - calculated ij-th element of matrix
         """
-        Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
+        Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(self.xPoints[i],i,j)
         return Element 
         
     def matrix_maker(self):
