@@ -33,6 +33,7 @@ import numpy as np
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import scipy.misc
+import scipy.special
           
 class Discrete_Solver:
     def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
@@ -152,8 +153,11 @@ class Ho_Solver:
         difference = hermiteValue1 - hermiteValue2
     
 
-        psi = self.mass**(1/4) * (1/np.sqrt(2**n)*scipy.misc.factorial(n)) * difference * np.exp(-x**2/2)
+        psi = self.mass**(1/4) * (1/(np.sqrt(2**n)*scipy.misc.factorial(n))) * difference * np.exp(-x**2/2)
         return psi
+
+    def HO_wavefunction2(self,x,n):
+        psi = self.mass**(1/4) * (1/(np.sqrt(2**n) * scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
 
     def momentum_operator_term(self,i,j):
         """
@@ -176,10 +180,11 @@ class Ho_Solver:
         """
         Finds the term in each matrix element associated with the potential operator
         """
-        for x in self.xPoints:
-            v_term = self.HO_wavefunction(x,i)* self.potential * self.HO_wavefunction(x,j)
-            v_term = integrate.quad(v_term, 0, self.n_steps)
-            return v_term
+
+        #v_term = self.HO_wavefunction2 * self.potential * self.HO_wavefunction2
+        v_term = integrate.quad(self.mass**(1/4) * (1/(np.sqrt(2**i) * scipy.misc.factorial(i))) * 
+            scipy.special.hermite(i) * np.exp(-x**2/2), self.xmin, self.xmax)
+        return v_term
 
     def matrix_element_finder(self,i,j): 
         """
@@ -203,7 +208,7 @@ class Ho_Solver:
         self.a = np.zeros((self.n_steps+1,self.n_steps+1))
         for i in range(1, self.n_steps):
             for j in range(1, self.n_steps):
-                self.a[i][j] = self.momentum_operator_term(i,j)
+                self.a[i][j] = self.matrix_element_finder(i,j)
         
     def matrix_solver(self):
         """
