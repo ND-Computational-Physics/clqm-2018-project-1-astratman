@@ -105,7 +105,7 @@ class Discrete_Solver:
             self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
 class Ho_Solver:
-    def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
+    def __init__(self, potential, xmin, xmax, n_functions, particle_mass):
         """
         Arguments:
         self (obj)
@@ -119,13 +119,14 @@ class Ho_Solver:
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
-        self.n_steps = n_steps
+        self.n_steps = 100 #want to be rows
+        self.n_functions = n_functions #want to be columns
         self.mass = particle_mass
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
-        self.xPoints = np.zeros(n_steps+1)
-        for i in range(n_steps+1):
+        self.xPoints = np.zeros(self.n_steps+1)
+        for i in range(self.n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
 
     def HO_wavefunction(self,x,n):
@@ -141,6 +142,7 @@ class Ho_Solver:
 
         """
         psi = self.mass**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        
         Psi = 0
         for i in (range(len(psi))):
             Psi += psi[i]*x**i
@@ -195,9 +197,9 @@ class Ho_Solver:
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
-        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1, self.n_steps):
-            for j in range(1, self.n_steps):
+        self.a = np.zeros((self.n_functions+1,self.n_functions+1))
+        for i in range(1, self.n_functions):
+            for j in range(1, self.n_functions):
                 self.a[i][j] = self.matrix_element_finder(i,j)
         
     def matrix_solver(self):
@@ -289,8 +291,10 @@ if (__name__ == "__main__"):
 
     #run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True
     print('buffer line')
-    run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
-    #w = Ho_Solver(ho_potential,-1,1,100,0.511)
+    
+    #currently, anything above 30 steps takes a very very long time to run
+    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
+    #w = Ho_Solver(ho_potential,-1,1,10,0.511)
     #print(w.v_term(0,1,1))
     #Random
 
