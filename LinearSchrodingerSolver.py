@@ -140,20 +140,20 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        coeff1 = np.zeros(n)
-        for i in range(len(coeff1)):
-            coeff1[i] = 1
+        #coeff1 = np.zeros(n)
+        #for i in range(len(coeff1)):
+        #    coeff1[i] = 1
 
-        coeff2 = np.zeros(n-1)
-        for i in range(len(coeff2)):
-            coeff2[i] = 1
+        #coeff2 = np.zeros(n-1)
+        #for i in range(len(coeff2)):
+        #    coeff2[i] = 1
 
-        hermiteValue1 = np.polynomial.hermite.hermval(x,coeff1)
-        hermiteValue2 = np.polynomial.hermite.hermval(x,coeff2)
-        difference = hermiteValue1 - hermiteValue2
+        #hermiteValue1 = np.polynomial.hermite.hermval(x,coeff1)
+        #hermiteValue2 = np.polynomial.hermite.hermval(x,coeff2)
+        #difference = hermiteValue1 - hermiteValue2
     
 
-        psi = self.mass**(1/4) * (1/(np.sqrt(2**n)*scipy.misc.factorial(n))) * difference * np.exp(-x**2/2)
+        psi = self.mass**(1/4) * (1/(np.sqrt(2**n)*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
         return psi
 
     def momentum_operator_term(self,i,j):
