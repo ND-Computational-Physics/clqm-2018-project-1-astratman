@@ -156,9 +156,6 @@ class Ho_Solver:
         psi = self.mass**(1/4) * (1/(np.sqrt(2**n)*scipy.misc.factorial(n))) * difference * np.exp(-x**2/2)
         return psi
 
-    def HO_wavefunction2(self,x,n):
-        psi = self.mass**(1/4) * (1/(np.sqrt(2**n) * scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
-
     def momentum_operator_term(self,i,j):
         """
         Finds the term in each matrix element associated with the momentum operator
