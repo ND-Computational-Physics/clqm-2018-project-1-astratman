@@ -140,8 +140,11 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * (1/(np.sqrt(2**n)*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
-        return psi
+        psi = self.mass**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        Psi = 0
+        for i in (range(len(psi))):
+            Psi += psi[i]*x**i
+        return Psi
 
     def momentum_operator_term(self,i,j):
         """
@@ -166,11 +169,12 @@ class Ho_Solver:
         """
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
-    def potential_operator_term(self, x, i, j):
+    def potential_operator_term(self, i, j):
         """
         Finds the term in each matrix element associated with the potential operator
         """
-        return integrate.quad(self.v_term, self.xmin, self.xmax, (i,j))
+        w = integrate.quad(self.v_term, self.xmin, self.xmax, (i,j))
+        return w[0]
 
     def matrix_element_finder(self,i,j): 
         """
@@ -184,7 +188,7 @@ class Ho_Solver:
         Returns: 
         Element (float) - calculated ij-th element of matrix
         """
-        Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(self.xPoints[i],i,j)
+        Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
         return Element 
         
     def matrix_maker(self):
@@ -285,6 +289,8 @@ if (__name__ == "__main__"):
     #run(ho_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True, plot = False)
     print('buffer line')
     run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
+    #w = Ho_Solver(ho_potential,-1,1,100,0.511)
+    #print(w.v_term(0,1,1))
 
 
 
