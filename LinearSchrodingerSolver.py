@@ -159,7 +159,7 @@ class Ho_Solver:
         for i in range(len(xPoints)):
             x = self.xPoints[i]
             for j in range(1,n_functions):
-                self.b[i][j] = HO_wavefunction(x,j)
+                self.b[i][j] = self.HO_wavefunction(x,j)
 
 
     def momentum_operator_term(self,i,j):
@@ -223,7 +223,10 @@ class Ho_Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
-        #Normalize the eigenvectors 
+        #Normalize the eigenvectors
+
+    def evaluate(self):
+        self.final = self.HO_matrix * self.eigenvectors
     
     
 def nrg_plot(psi, n, m = None):
