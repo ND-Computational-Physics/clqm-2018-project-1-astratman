@@ -106,7 +106,7 @@ class Discrete_Solver:
             self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
 class Ho_Solver:
-    def __init__(self, potential, xmin, xmax, n_functions, particle_mass):
+    def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega):
         """
         Arguments:
         self (obj)
@@ -123,6 +123,7 @@ class Ho_Solver:
         self.n_steps = 100 #want to be rows
         self.n_functions = n_functions #want to be columns
         self.mass = particle_mass
+        self.omega = omega
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -142,7 +143,7 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        psi = self.mass**(1/4) * omega**2 * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
         
         Psi = 0
         for i in (range(len(psi))):
