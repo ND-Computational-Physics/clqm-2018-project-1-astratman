@@ -169,21 +169,19 @@ class Ho_Solver:
             ElementM = np.sqrt(j+1)*np.sqrt(j+2)
         elif i == j:
             ElementM = -(j+1) - j
-        elif i == (j-2):
+        elif j == (i+2):
             ElementM = np.sqrt(j)*np.sqrt(j-1)
         else:
             ElementM = 0
         #set hbar = 1, omega = 1
         return ElementM/4
         
-    def potential_operator_term(self, i, j):
+    def potential_operator_term(self i, j):
         """
         Finds the term in each matrix element associated with the potential operator
         """
-
-        #v_term = self.HO_wavefunction2 * self.potential * self.HO_wavefunction2
-        v_term = integrate.quad(self.mass**(1/4) * (1/(np.sqrt(2**i) * scipy.misc.factorial(i))) * 
-            scipy.special.hermite(i) * np.exp(-x**2/2), self.xmin, self.xmax)
+        v_term = self.HO_wavefunction(i) * self.potential * self.HO_wavefunction(j)
+        v_term = integrate.quad(v_term, self.xim, self.xmax)
         return v_term
 
     def matrix_element_finder(self,i,j): 
@@ -198,8 +196,8 @@ class Ho_Solver:
         Returns: 
         Element (float) - calculated ij-th element of matrix
         """
-        return self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
-        
+        Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
+        return Element 
         
     def matrix_maker(self):
         """
@@ -217,7 +215,7 @@ class Ho_Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
-        #Normalize the eigenvectors
+        #Normalize the eigenvectors 
     
     
 def nrg_plot(psi, n, m = None):
@@ -240,7 +238,7 @@ def nrg_plot(psi, n, m = None):
     plt.show()
 
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -283,7 +281,8 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     if hamiltonian == True:
         print(potential.a)
 
-    nrg_plot(potential, n, m)
+    if plot == None:
+        nrg_plot(potential, n, m)
    
    
 if (__name__ == "__main__"):
@@ -295,10 +294,9 @@ if (__name__ == "__main__"):
     def ho_potential(x):
         return -(1/2)*x**2/0.511
      
-    #run(square_well_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True)
-    #print('buffer line')
-    #run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True)
-    run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True)
+    #run(ho_potential, 0, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True, plot = False)
+    print('buffer line')
+    run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
 
 
 
