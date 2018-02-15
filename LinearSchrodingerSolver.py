@@ -292,6 +292,7 @@ if (__name__ == "__main__"):
     run(ho_potential, -1, 1, 100, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
     #w = Ho_Solver(ho_potential,-1,1,100,0.511)
     #print(w.v_term(0,1,1))
+    #Random
 
 
 
