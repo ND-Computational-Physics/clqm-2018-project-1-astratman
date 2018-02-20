@@ -36,7 +36,7 @@ import scipy.misc
 import scipy.special
           
 class Discrete_Solver:
-    def __init__(self, potential, xmin, xmax, n_functions, particle_mass):
+    def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
         """
         Arguments:
         self (obj)
@@ -50,14 +50,13 @@ class Discrete_Solver:
         self.potential = potential
         self.xmin = xmin
         self.xmax = xmax
-        self.n_steps = 100
-        self.n_functions = n_functions
+        self.n_steps = n_steps
         self.mass = particle_mass
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
-        self.xPoints = np.zeros(n_steps+1)
-        for i in range(n_steps+1):
+        self.xPoints = np.zeros(self.n_steps+1)
+        for i in range(self.n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
         
     def matrix_element_finder(self,i,j): 
@@ -89,9 +88,9 @@ class Discrete_Solver:
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
-        self.a = np.zeros((self.n_functions+1,self.n_functions+1))
-        for i in range(1, self.n_functions):
-            for j in range(1, self.n_functions):
+        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
+        for i in range(1, self.n_steps):
+            for j in range(1, self.n_steps):
                 self.a[i][j] = self.matrix_element_finder(i,j)
 
     def matrix_solver(self):
@@ -106,7 +105,7 @@ class Discrete_Solver:
             self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
 class Ho_Solver:
-    def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega):
+    def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega = 1):
         """
         Arguments:
         self (obj)
@@ -143,7 +142,7 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * omega**2 * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        psi = self.mass**(1/4) * self.omega**2 * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
         
         Psi = 0
         for i in (range(len(psi))):
@@ -156,10 +155,10 @@ class Ho_Solver:
         n_steps: rows, each row corresponds to different wavefunctions evaluated at the same point
         n_functions: columns, each column corresponds to the same wavefunction evaluated at different points
         """
-        self.b = np.zeros((self.n_steps+1,self.n_functions+1))
+        self.b = np.zeros((self.n_steps,self.n_functions))
         for i in range(len(xPoints)):
             x = self.xPoints[i]
-            for j in range(1,n_functions):
+            for j in range(0,n_functions):
                 self.b[i][j] = self.HO_wavefunction(x,j)
 
 
@@ -190,7 +189,7 @@ class Ho_Solver:
         """
         Finds the term in each matrix element associated with the potential operator
         """
-        w = integrate.quad(self.v_term, self.xmin, self.xmax, (i,j))
+        w = integrate.quad(self.v_term, 5*self.xmin, 5*self.xmax, (i,j))
         return w[0]
 
     def matrix_element_finder(self,i,j): 
@@ -212,10 +211,10 @@ class Ho_Solver:
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
-        self.a = np.zeros((self.n_functions+1,self.n_functions+1))
-        for i in range(1, self.n_functions):
-            for j in range(1, self.n_functions):
-                self.a[i][j] = self.matrix_element_finder(i,j)
+        self.hamiltonian = np.zeros((self.n_functions,self.n_functions))
+        for i in range(0, self.n_functions):
+            for j in range(0, self.n_functions):
+                self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
         
     def matrix_solver(self):
         """
@@ -239,6 +238,8 @@ def nrg_plot(psi, n, m = None):
     n (int) - lower bound of eigenvectors to plot
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
     """
+    
+    #PUT THE CHANGE OF BASIS HERE INSTEAD OF IN THE SOLVER
     if m == None:
         plt.plot(psi.xPoints,psi.eigenvectors[n+1])
     else:
@@ -250,7 +251,7 @@ def nrg_plot(psi, n, m = None):
     plt.show()
 
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, omega = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -265,6 +266,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     solver (int) [OPTIONAL] - defines which solver (basis) to use:
                                 (1) = Discrete Solver
                                 (2) = Harmonic Oscillator Solver
+    omega (float) [OPTIONAL] - set omega to a value other than 1 for the HO Solver
     x_points (bool) [OPTIONAL] - if True, prints the xPoints array
     e_values(bool) [OPTIONAL] - if True, prints the eigenvalues array
     e_vectors(bool) [OPTIONAL] - if True, prints the eigenvectors array
@@ -272,8 +274,10 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     """
     if solver == 1:
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
-    elif solver == 2:
+    elif solver == 2 & omega == 1:
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass)
+    elif solver == 2 & omega !=1:
+        potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
     else:
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
         return
@@ -304,16 +308,17 @@ if (__name__ == "__main__"):
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return -(1/2)*x**2/0.511
+        return (1/2)*x**2/0.511
      
 
-    run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
+    #run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
     print('buffer line')
     
     #currently, anything above 30 steps takes a very very long time to run
-    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
-    #w = Ho_Solver(ho_potential,-1,1,10,0.511)
-    #print(w.v_term(0,1,1))
+    #run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
+    w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
+    w.matrix_maker()
+    print(w.hamiltonian)
     #Random
 
 
