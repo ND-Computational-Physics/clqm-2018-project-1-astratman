@@ -320,7 +320,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         potential.HO_matrix()
     else:
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
-        return
     
     potential.matrix_maker()
     potential.matrix_solver()
