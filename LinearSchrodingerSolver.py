@@ -314,6 +314,7 @@ if (__name__ == "__main__"):
     #run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
     print('buffer line')
     
+    #Need to define omega as 1/mass**2
     #currently, anything above 30 steps takes a very very long time to run
     #run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
     w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
