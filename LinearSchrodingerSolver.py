@@ -105,7 +105,7 @@ class Discrete_Solver:
             self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
         
 class Ho_Solver:
-    def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega = 1):
+    def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega):
         """
         Arguments:
         self (obj)
@@ -220,7 +220,7 @@ class Ho_Solver:
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
-        self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
+        self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
         #Normalize the eigenvectors
@@ -251,7 +251,7 @@ def nrg_plot(psi, n, m = None):
     plt.show()
 
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, omega = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -266,7 +266,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, omega = 1, x
     solver (int) [OPTIONAL] - defines which solver (basis) to use:
                                 (1) = Discrete Solver
                                 (2) = Harmonic Oscillator Solver
-    omega (float) [OPTIONAL] - set omega to a value other than 1 for the HO Solver
     x_points (bool) [OPTIONAL] - if True, prints the xPoints array
     e_values(bool) [OPTIONAL] - if True, prints the eigenvalues array
     e_vectors(bool) [OPTIONAL] - if True, prints the eigenvectors array
@@ -274,9 +273,8 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, omega = 1, x
     """
     if solver == 1:
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
-    elif solver == 2 & omega == 1:
-        potential = Ho_Solver(p_function, xmin, xmax, dim, mass)
-    elif solver == 2 & omega !=1:
+    elif solver == 2:
+        omega = 1/mass**2
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
     else:
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
@@ -316,10 +314,10 @@ if (__name__ == "__main__"):
     
     #Need to define omega as 1/mass**2
     #currently, anything above 30 steps takes a very very long time to run
-    #run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
-    w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
-    w.matrix_maker()
-    print(w.hamiltonian)
+    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
+    #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
+    #w.matrix_maker()
+    #print(w.hamiltonian)
     #Random
 
 
