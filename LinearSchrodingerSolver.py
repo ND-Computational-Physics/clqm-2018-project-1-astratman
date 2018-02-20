@@ -240,6 +240,8 @@ def nrg_plot(psi, n, m = None):
     """
     
     #PUT THE CHANGE OF BASIS HERE INSTEAD OF IN THE SOLVER
+    print(psi.xPoints)
+    print(psi.eigenvectors)
     if m == None:
         plt.plot(psi.xPoints,psi.eigenvectors[n+1])
     else:
