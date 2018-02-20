@@ -56,8 +56,8 @@ class Discrete_Solver:
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
-        self.xPoints = np.zeros(n_steps+1)
-        for i in range(n_steps+1):
+        self.xPoints = np.zeros(self.n_steps+1)
+        for i in range(self.n_steps+1):
             self.xPoints[i] = i*self.h + self.xmin
         
     def matrix_element_finder(self,i,j): 
@@ -143,7 +143,7 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * omega**2 * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        psi = self.mass**(1/4) * self.omega**2 * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
         
         Psi = 0
         for i in (range(len(psi))):
@@ -250,7 +250,7 @@ def nrg_plot(psi, n, m = None):
     plt.show()
 
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def run(p_function, xmin, xmax, dim, mass, omega, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -273,7 +273,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     if solver == 1:
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
     elif solver == 2:
-        potential = Ho_Solver(p_function, xmin, xmax, dim, mass)
+        potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
     else:
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
         return
@@ -307,12 +307,13 @@ if (__name__ == "__main__"):
         return -(1/2)*x**2/0.511
      
 
-    run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
-    print('buffer line')
+    #run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
+    #print('buffer line')
     
+    #Need to define omega as 1/mass**2
     #currently, anything above 30 steps takes a very very long time to run
-    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
-    #w = Ho_Solver(ho_potential,-1,1,10,0.511)
+    run(ho_potential, -1, 1, 5, 0.511, 1, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
+    w = Ho_Solver(ho_potential,-1,1,10,0.511,1)
     #print(w.v_term(0,1,1))
     #Random
 
