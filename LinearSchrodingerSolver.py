@@ -126,8 +126,8 @@ class Ho_Solver:
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
-        self.xPoints = np.zeros(self.n_steps+1)
-        for i in range(self.n_steps+1):
+        self.xPoints = np.zeros(self.n_steps)
+        for i in range(self.n_steps):
             self.xPoints[i] = i*self.h + self.xmin
 
     def HO_wavefunction(self,x,n):
@@ -147,19 +147,23 @@ class Ho_Solver:
         Psi = 0
         for i in (range(len(psi))):
             Psi += psi[i]*x**i
+        #print("HO_wavefunction")
         return Psi
 
-    def HO_matrix(self,n_steps,n_functions):
+    def HO_matrix(self):
         """
         Creates a matrix with different harmonic oscillator wavefunctions evaluated at a vector of xPoints
-        n_steps: rows, each row corresponds to different wavefunctions evaluated at the same point
-        n_functions: columns, each column corresponds to the same wavefunction evaluated at different points
+        
+        Arguments:
+        n_steps(int) - number of rows, each row corresponds to different wavefunctions evaluated at the same point
+        n_functions(int) - number of columns, each column corresponds to the same wavefunction evaluated at different points
         """
-        self.b = np.zeros((self.n_steps,self.n_functions))
-        for i in range(len(xPoints)):
+        self.transform = np.zeros((self.n_steps,self.n_functions))
+        for i in range(len(self.xPoints)):
             x = self.xPoints[i]
-            for j in range(0,n_functions):
-                self.b[i][j] = self.HO_wavefunction(x,j)
+            for j in range(0,self.n_functions):
+                self.transform[i][j] = self.HO_wavefunction(x,j)
+        #print("HO_matrix")
 
 
     def momentum_operator_term(self,i,j):
@@ -177,19 +181,37 @@ class Ho_Solver:
         else:
             ElementM = 0
         #set hbar = 1, omega = 1
+        #print("momentum_operator_term")
         return ElementM/4
         
     def v_term(self, x, i, j):
         """
         Creates the function within the integral for each potential term
+        
+        Arguments:
+        x(float) - the position to evaluate the wavefunction
+        i (int) - the row of the matrix to calculate
+        j (int) - the column of the matrix to calculate
+        
+        Returns: 
+        (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
         """
+        #print("v_term")
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
     def potential_operator_term(self, i, j):
         """
         Finds the term in each matrix element associated with the potential operator
+        
+        Arguments:
+        i (int) - the row of the matrix to calculate
+        j (int) - the column of the matrix to calculate
+        
+        Returns: 
+        w[0] (float) - the integrated wavefunction at a point
         """
         w = integrate.quad(self.v_term, 5*self.xmin, 5*self.xmax, (i,j))
+        #print("potential_operator_term")
         return w[0]
 
     def matrix_element_finder(self,i,j): 
@@ -205,6 +227,7 @@ class Ho_Solver:
         Element (float) - calculated ij-th element of matrix
         """
         Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
+        #print("matrix_element_finder")
         return Element 
         
     def matrix_maker(self):
@@ -215,6 +238,7 @@ class Ho_Solver:
         for i in range(0, self.n_functions):
             for j in range(0, self.n_functions):
                 self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
+        #print("matrix_maker")
         
     def matrix_solver(self):
         """
@@ -223,10 +247,12 @@ class Ho_Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
+        #print("matrix_solver")
         #Normalize the eigenvectors
 
     def evaluate(self):
         self.final = self.HO_matrix * self.eigenvectors
+        print("evaluate")
     
     
 def nrg_plot(psi, n, m = None):
@@ -240,17 +266,30 @@ def nrg_plot(psi, n, m = None):
     """
     
     #PUT THE CHANGE OF BASIS HERE INSTEAD OF IN THE SOLVER
-    print(psi.xPoints)
-    print(psi.eigenvectors)
+    
+    if hasattr(psi, 'transform'):
+        eigenvectors = np.dot(psi.transform, psi.eigenvectors)
+        eigenvectors = np.transpose(eigenvectors)
+        #print("eigenvectors")
+        #print(eigenvectors)
+    else:
+        eigenvectors = psi.eigenvectors
+        #print("eigenvectors")
+    
+    
+    print(eigenvectors.shape)
+    print(psi.xPoints.shape)
+    print(eigenvectors[0].shape)
     if m == None:
-        plt.plot(psi.xPoints,psi.eigenvectors[n+1])
+        plt.plot(psi.xPoints,eigenvectors[0])
     else:
         for i in range(n,m):
-            plt.plot(psi.xPoints,psi.eigenvectors[i+1])
+            plt.plot(psi.xPoints,eigenvectors[i+1])
 
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
     plt.show()
+    print("nrg_plot")
 
 
 def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
@@ -278,6 +317,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     elif solver == 2:
         omega = 1/mass**2
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
+        potential.HO_matrix()
     else:
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
         return
@@ -299,6 +339,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
 
     if plot == None:
         nrg_plot(potential, n, m)
+    print("run")
    
    
 if (__name__ == "__main__"):
@@ -316,7 +357,7 @@ if (__name__ == "__main__"):
     
     #Need to define omega as 1/mass**2
     #currently, anything above 30 steps takes a very very long time to run
-    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, x_points = True, e_values = True, e_vectors = True)
+    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2)
     #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
     #w.matrix_maker()
     #print(w.hamiltonian)
