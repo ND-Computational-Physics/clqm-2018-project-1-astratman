@@ -1,5 +1,4 @@
 """
-
 Anne Stratman
 Ben Riordan
 Jan. 25th, 2018
@@ -27,8 +26,8 @@ c = 1
 Neutron mass mN*c**2: 938 MeV
 hbar*c = 197 MeV fm
 Units of hbar*c / mN*c**2: MeV fm**2
-
 """
+
 import numpy as np
 import scipy.integrate as integrate
 import matplotlib.pyplot as plt
@@ -107,14 +106,24 @@ class Discrete_Solver:
 class Ho_Solver:
     def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega):
         """
-        Arguments:
+        Attributes:
+        \Initialized\
         self (obj)
         potential(function) - potential function to use in solving the NLS
         xmin(float) - left bound of position
         xmax(float) - right bound of position
-        n_steps(int) - -number of increments in interval
+        n_functions(int) - -number of eigenfunctions to find
         particle_mass (float) - mass of particle in keV
-        hbarc is in MeV fm
+        omega (float) - frequency of HO
+        
+        \Assigned\
+        n_steps(int) - number of steps to take within the x range
+        h(float) - the spacing between each x point
+        xPoints(float array) - a 1D array of x points
+        transform(float array) - a 2D array used to change basis from the HO basis to the discrete basis
+        hamiltonian(float array) - the hamiltonian operator matrix (2D array)
+        eigenvalues(float array) - a 1D array of the eigenvalues for our potential
+        eigenvectors(float array) - a 2D array of eigenevectors for our potential
         """
         self.potential = potential
         self.xmin = xmin
@@ -147,7 +156,6 @@ class Ho_Solver:
         Psi = 0
         for i in (range(len(psi))):
             Psi += psi[i]*x**i
-        #print("HO_wavefunction")
         return Psi
 
     def HO_matrix(self):
@@ -163,14 +171,14 @@ class Ho_Solver:
             x = self.xPoints[i]
             for j in range(0,self.n_functions):
                 self.transform[i][j] = self.HO_wavefunction(x,j)
-        #print("HO_matrix")
-
 
     def momentum_operator_term(self,i,j):
         """
         Finds the term in each matrix element associated with the momentum operator
-        i's are rows, j's are columns
-        Need to add coefficients
+        
+        Arguments:
+        i(int) - the row of the term to evaluate
+        j(int) - the column of the term to evaluate
         """
         if i == (j+2):
             ElementM = np.sqrt(j+1)*np.sqrt(j+2)
@@ -181,7 +189,6 @@ class Ho_Solver:
         else:
             ElementM = 0
         #set hbar = 1, omega = 1
-        #print("momentum_operator_term")
         return ElementM/4
         
     def v_term(self, x, i, j):
@@ -190,13 +197,12 @@ class Ho_Solver:
         
         Arguments:
         x(float) - the position to evaluate the wavefunction
-        i (int) - the row of the matrix to calculate
-        j (int) - the column of the matrix to calculate
+        i(int) - the row of the matrix to calculate
+        j(int) - the column of the matrix to calculate
         
         Returns: 
         (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
         """
-        #print("v_term")
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
     def potential_operator_term(self, i, j):
@@ -204,14 +210,13 @@ class Ho_Solver:
         Finds the term in each matrix element associated with the potential operator
         
         Arguments:
-        i (int) - the row of the matrix to calculate
-        j (int) - the column of the matrix to calculate
+        i(int) - the row of the matrix to calculate
+        j(int) - the column of the matrix to calculate
         
         Returns: 
         w[0] (float) - the integrated wavefunction at a point
         """
         w = integrate.quad(self.v_term, 5*self.xmin, 5*self.xmax, (i,j))
-        #print("potential_operator_term")
         return w[0]
 
     def matrix_element_finder(self,i,j): 
@@ -220,14 +225,13 @@ class Ho_Solver:
         All elements are nonzero except diagonal and off-diagonal elements
         
         Arguments:
-        i (int) - the row of the matrix to calculate
-        j (int) - the column of the matrix to calculate
+        i(int) - the row of the matrix to calculate
+        j(int) - the column of the matrix to calculate
         
         Returns: 
         Element (float) - calculated ij-th element of matrix
         """
         Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
-        #print("matrix_element_finder")
         return Element 
         
     def matrix_maker(self):
@@ -238,7 +242,6 @@ class Ho_Solver:
         for i in range(0, self.n_functions):
             for j in range(0, self.n_functions):
                 self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
-        #print("matrix_maker")
         
     def matrix_solver(self):
         """
@@ -247,14 +250,8 @@ class Ho_Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
         
-        #print("matrix_solver")
-        #Normalize the eigenvectors
+        #NORMALIZE THE EIGENVECTORS?
 
-    def evaluate(self):
-        self.final = self.HO_matrix * self.eigenvectors
-        print("evaluate")
-    
-    
 def nrg_plot(psi, n, m = None):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
@@ -262,6 +259,7 @@ def nrg_plot(psi, n, m = None):
     Arguments:
     psi (Solver obj) - an object representing a specific hamiltonian
     n (int) - lower bound of eigenvectors to plot
+     
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
     """
     
@@ -270,26 +268,23 @@ def nrg_plot(psi, n, m = None):
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
         eigenvectors = np.transpose(eigenvectors)
-        #print("eigenvectors")
-        #print(eigenvectors)
+        print("eigenvectors")
+        print(eigenvectors)
     else:
+        #Here, may want to cut out the buffer rows of the matrix (i.e the eigenvectors with just one element)
         eigenvectors = psi.eigenvectors
         #print("eigenvectors")
     
-    
-    print(eigenvectors.shape)
-    print(psi.xPoints.shape)
-    print(eigenvectors[0].shape)
+    #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
     if m == None:
-        plt.plot(psi.xPoints,eigenvectors[0])
+        plt.plot(psi.xPoints,eigenvectors[n-1])
     else:
         for i in range(n,m):
-            plt.plot(psi.xPoints,eigenvectors[i+1])
+            plt.plot(psi.xPoints,eigenvectors[i-1])
 
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
     plt.show()
-    print("nrg_plot")
 
 
 def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
@@ -301,6 +296,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     xmin (float) - left bound of positions
     xmax (float) - right bound of positions
     dim (int) - number of increments when evaluating the wavefunctions
+    mass (float) - the mass of the particle caught in our potential
     n (int) - lower bound of eigenvectors to plot
     
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
@@ -311,11 +307,14 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     e_values(bool) [OPTIONAL] - if True, prints the eigenvalues array
     e_vectors(bool) [OPTIONAL] - if True, prints the eigenvectors array
     hamiltonian(bool) [OPTIONAL] - if True, prints the a array
+    plot (None) [OPTIONAL] - if None, plots the wavefunction within the potential
     """
     if solver == 1:
+        #note, here dim is the number of steps taken
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
     elif solver == 2:
         omega = 1/mass**2
+        #note, here dim is the number of functions
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
     else:
@@ -339,7 +338,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
 
     if plot == None:
         nrg_plot(potential, n, m)
-    print("run")
    
    
 if (__name__ == "__main__"):
@@ -356,8 +354,11 @@ if (__name__ == "__main__"):
     print('buffer line')
     
     #Need to define omega as 1/mass**2
-    #currently, anything above 30 steps takes a very very long time to run
-    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2)
+    print("harmonic oscillator")
+    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, e_vectors = True)
+    
+    print("square well")
+    run(square_well_potential, -1, 1, 100, 0.511, 1, solver = 1, e_vectors = True)
     #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
     #w.matrix_maker()
     #print(w.hamiltonian)
