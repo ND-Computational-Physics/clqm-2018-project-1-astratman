@@ -96,13 +96,14 @@ class Discrete_Solver:
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
-        self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.a)
-        self.eigenvectors = np.transpose(self.eigenvectors)
+        self.eigenvalues, self.work_eigenvectors = np.linalg.eigh(self.a)
+        self.work_eigenvectors = np.transpose(self.work_eigenvectors)
         
         #Normalization of the eigenvectors
-        for i in range(0, len(self.eigenvectors)):
-            self.eigenvectors[i] = (1/np.sqrt(self.h)) * self.eigenvectors[i]
-        
+        for i in range(0, len(self.work_eigenvectors)):
+            self.work_eigenvectors[i] = (1/np.sqrt(self.h)) * self.work_eigenvectors[i]
+        self.eigenvectors = np.delete(self.work_eigenvectors,[0,1],0)
+            
 class Ho_Solver:
     def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega):
         """
@@ -151,7 +152,7 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * self.omega**2 * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        psi = self.mass**(1/4) * self.omega**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
         
         Psi = 0
         for i in (range(len(psi))):
@@ -333,7 +334,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         print(potential.eigenvectors)
         
     if hamiltonian == True:
-        print(potential.a)
+        print(potential.hamiltonian)
 
     if plot == None:
         nrg_plot(potential, n, m)
@@ -354,10 +355,10 @@ if (__name__ == "__main__"):
     
     #Need to define omega as 1/mass**2
     print("harmonic oscillator")
-    run(ho_potential, -1, 1, 5, 0.511, 1, solver = 2, e_vectors = True)
+    run(ho_potential, -1, 1, 5, 0.511, 3, solver = 2, e_vectors = True)
     
     print("square well")
-    run(square_well_potential, -1, 1, 100, 0.511, 1, solver = 1, e_vectors = True)
+    run(square_well_potential, -1, 1, 100, 0.511, 3, solver = 1, e_vectors = True)
     #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
     #w.matrix_maker()
     #print(w.hamiltonian)
