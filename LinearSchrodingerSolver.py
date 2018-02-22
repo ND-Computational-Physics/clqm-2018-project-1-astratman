@@ -192,7 +192,7 @@ class Ho_Solver:
         #set hbar = 1, omega = 1
         return ElementM/4
         
-    def v_term(self, x, i, j):
+    def v_integral_term(self, x, i, j):
         """
         Creates the function within the integral for each potential term
         
@@ -217,7 +217,7 @@ class Ho_Solver:
         Returns: 
         w[0] (float) - the integrated wavefunction at a point
         """
-        w = integrate.quad(self.v_term, 5*self.xmin, 5*self.xmax, (i,j))
+        w = integrate.quad(self.v_integral_term, 100*self.xmin, 100*self.xmax, (i,j))
         return w[0]
 
     def matrix_element_finder(self,i,j): 
@@ -280,7 +280,7 @@ def nrg_plot(psi, n, m = None):
     if m == None:
         plt.plot(psi.xPoints,eigenvectors[n-1])
     else:
-        for i in range(n,m):
+        for i in range(n,m+1):
             plt.plot(psi.xPoints,eigenvectors[i-1])
 
     plt.ylabel('WaveFunction')
@@ -355,10 +355,10 @@ if (__name__ == "__main__"):
     
     #Need to define omega as 1/mass**2
     print("harmonic oscillator")
-    run(ho_potential, -1, 1, 5, 0.511, 3, solver = 2, e_vectors = True)
+    run(ho_potential, -10, 10, 5, 0.511, 1, m=3, solver = 2, e_vectors = True)
     
     print("square well")
-    run(square_well_potential, -1, 1, 100, 0.511, 3, solver = 1, e_vectors = True)
+    run(square_well_potential, -10, 10, 100, 0.511, 1, m=3, solver = 1, e_vectors = True)
     #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
     #w.matrix_maker()
     #print(w.hamiltonian)
