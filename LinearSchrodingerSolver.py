@@ -135,13 +135,15 @@ class Ho_Solver:
         self.mass = particle_mass
         self.omega = omega
         self.pi = np.pi
+        self.h_bar = 1
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
         self.xPoints = np.zeros(self.n_steps)
         for i in range(self.n_steps):
             self.xPoints[i] = i*self.h + self.xmin
-
+    
+    
     def HO_wavefunction(self,x,n):
         """
         Defines the harmonic oscillator wavefunction
@@ -154,27 +156,11 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * self.omega**(1/4) / self.pi**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
-        #Psi = self.mass**(1/4) * self.omega**(1/4) / self.pi**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * hermite.hermite(x,n) * np.exp(-x**2/2)
-        #print(psi)
-        
-        #Psi = 0
-        #for i in (range(len(psi))):
-        #    Psi += psi[i]*x**i
-        #print("n:" + str(n))
-        #print(Psi)
-        #return Psi
+        curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
 
-    def integrand(self,x,i,j):
-        Hermite1 = hermite.hermite(i,x)
-        psi1 = (1/(np.sqrt(float(2**i))*scipy.misc.factorial(i))) * Hermite1 * np.exp(-x**2/2)
-
-        Hermite2 = hermite.hermite(j,x)
-        psi2 = (1/(np.sqrt(float(2**j))*scipy.misc.factorial(j))) * Hermite2 * np.exp(-x**2/2)
-
-        potential = (1/2)*x**2/electron_mass
-
-        return psi1 * potential * psi2
+        Hermite = hermite.hermite(n,curvy_e)
+        psi = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**n)*scipy.misc.factorial(n))) * Hermite * np.exp(-curvy_e**2/2)
+        return psi
 
     def HO_matrix(self):
         """
@@ -198,6 +184,7 @@ class Ho_Solver:
         i(int) - the row of the term to evaluate
         j(int) - the column of the term to evaluate
         """
+        prefactor = (-1*self.h_bar*self.omega)/4
         if i == (j+2):
             ElementM = np.sqrt(j+1)*np.sqrt(j+2)
         elif i == j:
@@ -207,9 +194,9 @@ class Ho_Solver:
         else:
             ElementM = 0
         #set hbar = 1, omega = 1
-        return ElementM/4
-        
-    #def v_integral_term(self, x, i, j):
+        return prefactor*ElementM
+
+    def integrand(self,x,i,j):
         """
         Creates the function within the integral for each potential term
         
@@ -221,19 +208,18 @@ class Ho_Solver:
         Returns: 
         (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
         """
-        
-        #print("x:", x, ", int term:", self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j))
-        #print("v=",self.potential(x))
-        #print("psi_i=", self.HO_wavefunction(x,i), "psi_j=", self.HO_wavefunction(x,j))
-        #print(" ")
-        return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
-        
-        #print("x:", x, ", int term:", self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j))
-        #print("v=",self.potential(x))
-        #print("psi_i=",self.HO_wavefunction(x,i), "psi_j=",self.HO_wavefunction(x,j))
-        #print(" ")
-        #return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
-        
+        curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
+
+        Hermite1 = hermite.hermite(i,curvy_e)
+        psi1 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**i)*scipy.misc.factorial(i))) * Hermite1 * np.exp((-curvy_e**2)/2)
+
+        Hermite2 = hermite.hermite(j,curvy_e)
+        psi2 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**j)*scipy.misc.factorial(j))) * Hermite2 * np.exp((-curvy_e**2)/2)
+
+        potential = (1/2) * self.mass * self.omega * (x**2)
+
+        return psi1 * potential * psi2
+    
     def potential_operator_term(self, i, j):
         """
         Finds the term in each matrix element associated with the potential operator
@@ -245,11 +231,10 @@ class Ho_Solver:
         Returns: 
         w[0] (float) - the integrated wavefunction at a point
         """
-        print("i=",i,"j=",j)
-        print(" ")
-        w = integrate.quad(self.integrand, self.xmin, self.xmax, args =(i,j))
-        print("w=",w[0])
-        return w[0]
+        #print("i = ", i, "j = ", j)
+        potential_value = integrate.quad(self.integrand,self.xmin,self.xmax,args=(i,j))
+        #print("potential=",potential_value[0])
+        return potential_value[0]
 
     def matrix_element_finder(self,i,j): 
         """
@@ -345,8 +330,8 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         #note, here dim is the number of steps taken
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
     elif solver == 2:
-        omega = 1/mass**2
-        #omega = 1
+        #omega = 1/mass**2
+        omega = 1
         #note, here dim is the number of functions
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
@@ -373,7 +358,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
    
    
 if (__name__ == "__main__"):
-    electron_mass = 0.511
+    electron_mass = 511
 
     #Test Case 1: The infinite square well potential
     def square_well_potential(x):

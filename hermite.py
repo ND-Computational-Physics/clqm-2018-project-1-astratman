@@ -15,7 +15,7 @@ import time
 # wave function definition
 ################################################################
 
-def hermite_recursive(x,n):
+def hermite_recursive(n,x):
     """ Evaluate Hermite polynomial H_n(x) by recurrence.
 
     Naive implementation through recursive function calls.
@@ -45,7 +45,7 @@ def hermite_recursive(x,n):
 
     return value
 
-def hermite_recursive_gutted(x,n):
+def hermite_recursive_gutted(n,x):
     """Evaluate Hermite polynomial H_n(x) by recurrence (timing test).
 
     Gutted to remove all arithmetic (or at least all multiplications).
@@ -75,7 +75,7 @@ def hermite_recursive_gutted(x,n):
 
     return value
 
-def hermite(x,n):
+def hermite(n,x):
     """ Evaluate Hermite polynomial H_n(x) by iterating recurrence.
 
     Uses recurrence H(n,x)=2*x*H(n-1,x)-2*(n-1)*H(n-2,x).
