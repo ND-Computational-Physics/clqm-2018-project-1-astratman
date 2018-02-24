@@ -33,6 +33,7 @@ import scipy.integrate as integrate
 import matplotlib.pyplot as plt
 import scipy.misc
 import scipy.special
+import hermite
           
 class Discrete_Solver:
     def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
@@ -154,6 +155,7 @@ class Ho_Solver:
 
         """
         psi = self.mass**(1/4) * self.omega**(1/4) / self.pi**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        #Psi = self.mass**(1/4) * self.omega**(1/4) / self.pi**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * hermite.hermite(x,n) * np.exp(-x**2/2)
         #print(psi)
         
         Psi = 0
@@ -209,10 +211,10 @@ class Ho_Solver:
         (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
         """
         
-        print("x:", x, ", int term:", self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j))
-        print("v=",self.potential(x))
-        print("psi_i=",self.HO_wavefunction(x,i), "psi_j=",self.HO_wavefunction(x,j))
-        print(" ")
+        #print("x:", x, ", int term:", self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j))
+        #print("v=",self.potential(x))
+        #print("psi_i=", self.HO_wavefunction(x,i), "psi_j=", self.HO_wavefunction(x,j))
+        #print(" ")
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
     def potential_operator_term(self, i, j):
@@ -281,8 +283,8 @@ def nrg_plot(psi, n, m = None):
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
         eigenvectors = np.transpose(eigenvectors)
-        print("eigenvectors")
-        print(eigenvectors)
+        #print("eigenvectors")
+        #print(eigenvectors)
     else:
         #Here, may want to cut out the buffer rows of the matrix (i.e the eigenvectors with just one element)
         eigenvectors = psi.eigenvectors
@@ -327,6 +329,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
     elif solver == 2:
         omega = 1/mass**2
+        #omega = 1
         #note, here dim is the number of functions
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
@@ -361,7 +364,7 @@ if (__name__ == "__main__"):
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return (1/2)*x**2/electron_mass
+        return (1/2)*x**2*electron_mass
      
 
     #run(ho_potential, -1, 1, 100, electron_mass, 1, x_points = True, e_values = True, e_vectors = True)
@@ -372,13 +375,13 @@ if (__name__ == "__main__"):
     #run(ho_potential, -10, 10, 5, electron_mass, 0, solver = 2, e_vectors = True)
     
     #print("square well basis")
-    print("square well")
-    run(square_well_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values= True, e_vectors = True)
+    #print("square well")
+    #run(square_well_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values= True, e_vectors = True)
     
     #print("harmonic oscillator")
-    #run(ho_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values = True, e_vectors = True)
+    run(ho_potential, -1, 1, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
     
-    w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 1)
+    #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
     #wvfctn = np.zeros(len(w.xPoints))
     #for i in range(len(w.xPoints)):
     #    wvfctn[i] = w.HO_wavefunction(w.xPoints[i],1)
@@ -387,8 +390,8 @@ if (__name__ == "__main__"):
     #plt.show()
         
     
-    w.matrix_maker()
-    print(w.hamiltonian)
+    #w.matrix_maker()
+    #print(w.hamiltonian)
     #Random
 
 
