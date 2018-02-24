@@ -208,8 +208,11 @@ class Ho_Solver:
         Returns: 
         (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
         """
+        
+        print("x:", x, ", int term:", self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j))
         print("v=",self.potential(x))
-        #print("HO=",self.HO_wavefunction(x,i))
+        print("psi_i=",self.HO_wavefunction(x,i), "psi_j=",self.HO_wavefunction(x,j))
+        print(" ")
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
     def potential_operator_term(self, i, j):
@@ -223,8 +226,10 @@ class Ho_Solver:
         Returns: 
         w[0] (float) - the integrated wavefunction at a point
         """
-        w = integrate.quad(self.v_integral_term, 100*self.xmin, 100*self.xmax, (i,j))
-        print("w=",w)
+        print("i=",i,"j=",j)
+        print(" ")
+        w = integrate.quad(self.v_integral_term, 1000*self.xmin, 1000*self.xmax, args =(i,j))
+        print("w=",w[0])
         return w[0]
 
     def matrix_element_finder(self,i,j): 
@@ -370,7 +375,7 @@ if (__name__ == "__main__"):
     #run(ho_potential, -10, 10, 100, electron_mass, 1, solver = 1, e_vectors = True)
     
     
-    w = Ho_Solver(ho_potential,-5,5,5,electron_mass, 1)
+    w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 1)
     #wvfctn = np.zeros(len(w.xPoints))
     #for i in range(len(w.xPoints)):
     #    wvfctn[i] = w.HO_wavefunction(w.xPoints[i],1)
