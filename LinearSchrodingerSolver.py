@@ -133,6 +133,7 @@ class Ho_Solver:
         self.n_functions = n_functions #want to be columns
         self.mass = particle_mass
         self.omega = omega
+        self.pi = np.pi
 
         self.h = (self.xmax-self.xmin)/self.n_steps
         
@@ -152,16 +153,15 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        #Changed to eval_hermite: evaluates the nth degree hermite polynomial at a specific point
-        hermite = scipy.special.eval_hermite(n,x)
-        psi = self.mass**(1/4) * self.omega**(1/4) * (1/np.pi)**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * hermite * np.exp(-x**2/2)
-        print("hermite=",hermite)
+        psi = self.mass**(1/4) * self.omega**(1/4) / self.pi**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        #print(psi)
         
-        #Psi = 0
-        #for i in (range(len(psi))):
-        #    Psi += psi[i]*x**i
-        #return Psi
-        return psi
+        Psi = 0
+        for i in (range(len(psi))):
+            Psi += psi[i]*x**i
+        #print("n:" + str(n))
+        #print(Psi)
+        return Psi
 
     def HO_matrix(self):
         """
@@ -348,27 +348,39 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
    
    
 if (__name__ == "__main__"):
+    electron_mass = 0.511
+
     #Test Case 1: The infinite square well potential
     def square_well_potential(x):
         return 0
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return x**2/(0.511*2)
+        return (1/2)*x**2/electron_mass
      
 
-    #run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
+    #run(ho_potential, -1, 1, 100, electron_mass, 1, x_points = True, e_values = True, e_vectors = True)
     print('buffer line')
     
     #Need to define omega as 1/mass**2
-    print("harmonic oscillator")
-    run(ho_potential, -5, 5, 5, 0.511, 1, m=3, solver = 2, e_vectors = True)
+    #print("harmonic oscillator basis")
+    #run(ho_potential, -10, 10, 5, electron_mass, 0, solver = 2, e_vectors = True)
     
-    print("square well")
-    run(square_well_potential, -10, 10, 5, 0.511, 1, m=3, solver = 2, e_vectors = True)
-    #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
-    #w.matrix_maker()
-    #print(w.hamiltonian)
+    #print("square well basis")
+    #run(ho_potential, -10, 10, 100, electron_mass, 1, solver = 1, e_vectors = True)
+    
+    
+    w = Ho_Solver(ho_potential,-5,5,5,electron_mass, 1)
+    #wvfctn = np.zeros(len(w.xPoints))
+    #for i in range(len(w.xPoints)):
+    #    wvfctn[i] = w.HO_wavefunction(w.xPoints[i],1)
+    
+    #plt.plot(w.xPoints,wvfctn)
+    #plt.show()
+        
+    
+    w.matrix_maker()
+    print(w.hamiltonian)
     #Random
 
 
