@@ -48,9 +48,9 @@ class Ho_Solver:
         return psi1 * potential * psi2
 
     def potential_integral(self,i,j):
-        print("i = ", i, "j = ", j)
+        #print("i = ", i, "j = ", j)
         potential_value = integrate.quad(self.integrand,self.xmin,self.xmax,args=(i,j))
-        print("potential=",potential_value[0])
+        #print("potential=",potential_value[0])
         return potential_value[0]
 
     def momentum_operator_term(self,i,j):
