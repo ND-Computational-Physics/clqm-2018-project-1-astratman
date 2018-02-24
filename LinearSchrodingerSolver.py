@@ -158,12 +158,23 @@ class Ho_Solver:
         #Psi = self.mass**(1/4) * self.omega**(1/4) / self.pi**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * hermite.hermite(x,n) * np.exp(-x**2/2)
         #print(psi)
         
-        Psi = 0
-        for i in (range(len(psi))):
-            Psi += psi[i]*x**i
+        #Psi = 0
+        #for i in (range(len(psi))):
+        #    Psi += psi[i]*x**i
         #print("n:" + str(n))
         #print(Psi)
-        return Psi
+        #return Psi
+
+    def integrand(self,x,i,j):
+        Hermite1 = hermite.hermite(i,x)
+        psi1 = (1/(np.sqrt(float(2**i))*scipy.misc.factorial(i))) * Hermite1 * np.exp(-x**2/2)
+
+        Hermite2 = hermite.hermite(j,x)
+        psi2 = (1/(np.sqrt(float(2**j))*scipy.misc.factorial(j))) * Hermite2 * np.exp(-x**2/2)
+
+        potential = (1/2)*x**2/electron_mass
+
+        return psi1 * potential * psi2
 
     def HO_matrix(self):
         """
@@ -198,7 +209,7 @@ class Ho_Solver:
         #set hbar = 1, omega = 1
         return ElementM/4
         
-    def v_integral_term(self, x, i, j):
+    #def v_integral_term(self, x, i, j):
         """
         Creates the function within the integral for each potential term
         
@@ -217,6 +228,12 @@ class Ho_Solver:
         #print(" ")
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
+        #print("x:", x, ", int term:", self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j))
+        #print("v=",self.potential(x))
+        #print("psi_i=",self.HO_wavefunction(x,i), "psi_j=",self.HO_wavefunction(x,j))
+        #print(" ")
+        #return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
+        
     def potential_operator_term(self, i, j):
         """
         Finds the term in each matrix element associated with the potential operator
@@ -230,7 +247,7 @@ class Ho_Solver:
         """
         print("i=",i,"j=",j)
         print(" ")
-        w = integrate.quad(self.v_integral_term, 1000*self.xmin, 1000*self.xmax, args =(i,j))
+        w = integrate.quad(self.integrand, self.xmin, self.xmax, args =(i,j))
         print("w=",w[0])
         return w[0]
 
