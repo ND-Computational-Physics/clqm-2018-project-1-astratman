@@ -359,6 +359,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
    
 if (__name__ == "__main__"):
     electron_mass = 511
+    omega = 1
 
     #Test Case 1: The infinite square well potential
     def square_well_potential(x):
@@ -366,7 +367,7 @@ if (__name__ == "__main__"):
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return (1/2)*x**2*electron_mass
+        return (1/2)*electron_mass*(omega**2)*(x**2)
      
 
     #run(ho_potential, -1, 1, 100, electron_mass, 1, x_points = True, e_values = True, e_vectors = True)
@@ -377,11 +378,11 @@ if (__name__ == "__main__"):
     #run(ho_potential, -10, 10, 5, electron_mass, 0, solver = 2, e_vectors = True)
     
     #print("square well basis")
-    #print("square well")
-    #run(square_well_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values= True, e_vectors = True)
+    print("square well")
+    run(square_well_potential, -0.3, 0.3, 10, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)
     
-    #print("harmonic oscillator")
-    run(ho_potential, -1, 1, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
+    print("harmonic oscillator")
+    run(ho_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
     
     #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
     #wvfctn = np.zeros(len(w.xPoints))
