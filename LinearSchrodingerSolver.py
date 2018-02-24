@@ -365,15 +365,18 @@ if (__name__ == "__main__"):
      
 
     #run(ho_potential, -1, 1, 100, electron_mass, 1, x_points = True, e_values = True, e_vectors = True)
-    print('buffer line')
+    #print('buffer line')
     
     #Need to define omega as 1/mass**2
     #print("harmonic oscillator basis")
     #run(ho_potential, -10, 10, 5, electron_mass, 0, solver = 2, e_vectors = True)
     
     #print("square well basis")
-    #run(ho_potential, -10, 10, 100, electron_mass, 1, solver = 1, e_vectors = True)
+    print("square well")
+    run(square_well_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values= True, e_vectors = True)
     
+    #print("harmonic oscillator")
+    #run(ho_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values = True, e_vectors = True)
     
     w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 1)
     #wvfctn = np.zeros(len(w.xPoints))
