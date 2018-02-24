@@ -152,12 +152,16 @@ class Ho_Solver:
             value of wavefunction (float)
 
         """
-        psi = self.mass**(1/4) * self.omega**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * scipy.special.hermite(n) * np.exp(-x**2/2)
+        #Changed to eval_hermite: evaluates the nth degree hermite polynomial at a specific point
+        hermite = scipy.special.eval_hermite(n,x)
+        psi = self.mass**(1/4) * self.omega**(1/4) * (1/np.pi)**(1/4) * (1/(np.sqrt(float(2**n))*scipy.misc.factorial(n))) * hermite * np.exp(-x**2/2)
+        print("hermite=",hermite)
         
-        Psi = 0
-        for i in (range(len(psi))):
-            Psi += psi[i]*x**i
-        return Psi
+        #Psi = 0
+        #for i in (range(len(psi))):
+        #    Psi += psi[i]*x**i
+        #return Psi
+        return psi
 
     def HO_matrix(self):
         """
@@ -204,6 +208,8 @@ class Ho_Solver:
         Returns: 
         (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
         """
+        print("v=",self.potential(x))
+        #print("HO=",self.HO_wavefunction(x,i))
         return self.HO_wavefunction(x,i) * self.potential(x) * self.HO_wavefunction(x,j)
         
     def potential_operator_term(self, i, j):
@@ -218,6 +224,7 @@ class Ho_Solver:
         w[0] (float) - the integrated wavefunction at a point
         """
         w = integrate.quad(self.v_integral_term, 100*self.xmin, 100*self.xmax, (i,j))
+        print("w=",w)
         return w[0]
 
     def matrix_element_finder(self,i,j): 
@@ -347,7 +354,7 @@ if (__name__ == "__main__"):
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return (1/2)*x**2/0.511
+        return x**2/(0.511*2)
      
 
     #run(ho_potential, -1, 1, 100, 0.511, 1, x_points = True, e_values = True, e_vectors = True)
@@ -355,10 +362,10 @@ if (__name__ == "__main__"):
     
     #Need to define omega as 1/mass**2
     print("harmonic oscillator")
-    run(ho_potential, -10, 10, 5, 0.511, 1, m=3, solver = 2, e_vectors = True)
+    run(ho_potential, -5, 5, 5, 0.511, 1, m=3, solver = 2, e_vectors = True)
     
     print("square well")
-    run(square_well_potential, -10, 10, 100, 0.511, 1, m=3, solver = 1, e_vectors = True)
+    run(square_well_potential, -10, 10, 5, 0.511, 1, m=3, solver = 2, e_vectors = True)
     #w = Ho_Solver(ho_potential,-1,1,5,0.511, 1)
     #w.matrix_maker()
     #print(w.hamiltonian)
