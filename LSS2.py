@@ -7,12 +7,12 @@ Computational Lab in Quantum Mechanics
 Steps:
 1. Transform radial Schrodinger equation to a dimensionless? form
 2. Rewrite as a matrix eigenvalue problem
-	a. Set up array of x-values
-	b. Set up equation for potential and evaluate potential at x-values to generate array of potential values
-	c. Construct 1D array of diagonal matrix elements
-	d. Construct 1D array of off-diagonal matrix elements
-	e. Construct matrix
-	f. Use numpy eigensolver to diagonalize matrix
+    a. Set up array of x-values
+    b. Set up equation for potential and evaluate potential at x-values to generate array of potential values
+    c. Construct 1D array of diagonal matrix elements
+    d. Construct 1D array of off-diagonal matrix elements
+    e. Construct matrix
+    f. Use numpy eigensolver to diagonalize matrix
 3. Results: eigenvectors are states, eigenvalues are energies
 4. Write output file with energies and eigenvectors as rows
 
@@ -127,83 +127,19 @@ class Ho_Solver:
         eigenvalues(float array) - a 1D array of the eigenvalues for our potential
         eigenvectors(float array) - a 2D array of eigenevectors for our potential
         """
-        self.potential = potential
-        self.xmin = xmin
-        self.xmax = xmax
-        self.n_steps = 100 #want to be rows
-        self.n_functions = n_functions #want to be columns
-        self.mass = particle_mass
-        self.omega = omega
-        self.pi = np.pi
-        self.h_bar = 1
-
-        self.h = (self.xmax-self.xmin)/self.n_steps
         
-        self.xPoints = np.zeros(self.n_steps)
-        for i in range(self.n_steps):
-            self.xPoints[i] = i*self.h + self.xmin
-    
     def HO_wavefunction(self,x,n):
         """
         Defines the harmonic oscillator wavefunction
-        hermval evaluates a Hermite series, so subtracts the value of the (n-1)th series from the value
-            of the nth series to get the value of the nth Hermite polynomial
-        Arguments:
-            x (float): x coordinate to evaluate wavefunction at
-            n (int): index of hermite polynomial and of wavefunction
-        Returns:
-            value of wavefunction (float)
         """
         curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
 
         Hermite = hermite.hermite(n,curvy_e)
         psi = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**n)*scipy.misc.factorial(n))) * Hermite * np.exp(-curvy_e**2/2)
-        return psi
-
-    def HO_matrix(self):
-        """
-        Creates a matrix with different harmonic oscillator wavefunctions evaluated at a vector of xPoints to use for a change of basis
-        
-        Arguments:
-        n_steps(int) - number of rows, each row corresponds to different wavefunctions evaluated at the same point
-        n_functions(int) - number of columns, each column corresponds to the same wavefunction evaluated at different points
-        """
-        self.transform = np.zeros((self.n_steps,self.n_functions))
-        for i in range(len(self.xPoints)):
-            x = self.xPoints[i]
-            for j in range(0,self.n_functions):
-                self.transform[i][j] = self.HO_wavefunction(x,j)
-
-    def momentum_operator_term(self,i,j):
-        """
-        Finds the term in each matrix element associated with the momentum operator
-        
-        Arguments:
-        i(int) - the row of the term to evaluate
-        j(int) - the column of the term to evaluate
-        """
-        prefactor = (-1*self.h_bar*self.omega)/4
-        if i == (j+2):
-            ElementM = np.sqrt(j+1)*np.sqrt(j+2)
-        elif i == j:
-            ElementM = -(j+1) - j
-        elif j == (i+2):
-            ElementM = np.sqrt(j)*np.sqrt(j-1)
-        else:
-            ElementM = 0
-        return prefactor*ElementM
 
     def integrand(self,x,i,j):
         """
-        Creates the function within the integral for each potential term
-        
-        Arguments:
-        x(float) - the position to evaluate the wavefunction
-        i(int) - the row of the matrix to calculate
-        j(int) - the column of the matrix to calculate
-        
-        Returns: 
-        (function) - returns the un-integrated inner product of the wavefunction with the wavefunction with the potential operator acted on it.
+        Defines the potential integrand
         """
         curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
 
@@ -216,36 +152,39 @@ class Ho_Solver:
         potential = (1/2) * self.mass * self.omega * (x**2)
 
         return psi1 * potential * psi2
-    
-    def potential_operator_term(self, i, j):
-        """
-        Finds the term in each matrix element associated with the potential operator
-        
-        Arguments:
-        i(int) - the row of the matrix to calculate
-        j(int) - the column of the matrix to calculate
-        
-        Returns: 
-        w[0] (float) - the integrated wavefunction at a point
-        """
+
+    def potential_integral(self,i,j):
+        #print("i = ", i, "j = ", j)
         potential_value = integrate.quad(self.integrand,self.xmin,self.xmax,args=(i,j))
+        #print("potential=",potential_value[0])
         return potential_value[0]
+
+    def momentum_operator_term(self,i,j):
+        """
+        Finds the term in each matrix element associated with the momentum operator
+        
+        Arguments: i is row and j is column
+        """
+        prefactor = (-1*self.h_bar*self.omega)/4
+        if i == (j+2):
+            ElementM = np.sqrt(j+1)*np.sqrt(j+2)
+        elif i == j:
+            ElementM = -(j+1) - j
+        elif j == (i+2):
+            ElementM = np.sqrt(j)*np.sqrt(j-1)
+        else:
+            ElementM = 0
+        #set hbar = 1, omega = 1
+        return prefactor*ElementM
 
     def matrix_element_finder(self,i,j): 
         """
         Calculates the i-jth element of the matrix
-        All elements are nonzero except diagonal and off-diagonal elements
-        
-        Arguments:
-        i(int) - the row of the matrix to calculate
-        j(int) - the column of the matrix to calculate
-        
-        Returns: 
-        Element (float) - calculated ij-th element of matrix
+        All elements should be nonzero except diagonal and off-diagonal elements
         """
-        Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
-        return Element 
-        
+        Element =  self.momentum_operator_term(i,j) + self.potential_integral(i,j)
+        return Element
+
     def matrix_maker(self):
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
@@ -254,14 +193,30 @@ class Ho_Solver:
         for i in range(0, self.n_functions):
             for j in range(0, self.n_functions):
                 self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
-        
+        return self.hamiltonian
+
     def matrix_solver(self):
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
-        #NORMALIZE THE EIGENVECTORS?
+
+    #Start non-square matrix stuff here
+
+    def HO_matrix(self):
+        """
+        Creates a matrix with different harmonic oscillator wavefunctions evaluated at a vector of xPoints
+        
+        Arguments:
+        n_steps(int) - number of rows, each row corresponds to different wavefunctions evaluated at the same point
+        n_functions(int) - number of columns, each column corresponds to the same wavefunction evaluated at different points
+        """
+        self.transform = np.zeros((self.n_steps,self.n_functions))
+        for i in range(len(self.xPoints)):
+            x = self.xPoints[i]
+            for j in range(0,self.n_functions):
+                self.transform[i][j] = self.HO_wavefunction(x,j)
 
 def nrg_plot(psi, n, m = None):
     """
@@ -279,9 +234,13 @@ def nrg_plot(psi, n, m = None):
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
         eigenvectors = np.transpose(eigenvectors)
+        print("eigenvectors")
+        print(eigenvectors)
     else:
+        #Here, may want to cut out the buffer rows of the matrix (i.e the eigenvectors with just one element)
         eigenvectors = psi.eigenvectors
-     
+        #print("eigenvectors")
+    
     #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
     if m == None:
         plt.plot(psi.xPoints,eigenvectors[n-1])
@@ -320,8 +279,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         #note, here dim is the number of steps taken
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
     elif solver == 2:
-        #omega = 1/mass**2
-        omega = 1
+        omega = 1/mass**2
         #note, here dim is the number of functions
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
@@ -348,8 +306,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
    
    
 if (__name__ == "__main__"):
-    electron_mass = 511
-    omega = 1
+    electron_mass = 0.511
 
     #Test Case 1: The infinite square well potential
     def square_well_potential(x):
@@ -357,21 +314,24 @@ if (__name__ == "__main__"):
 
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return (1/2)*electron_mass*(omega**2)*(x**2)
+        return (1/2)*x**2/electron_mass
      
+
+    #run(ho_potential, -1, 1, 100, electron_mass, 1, x_points = True, e_values = True, e_vectors = True)
+    #print('buffer line')
     
     #Need to define omega as 1/mass**2
     #print("harmonic oscillator basis")
     #run(ho_potential, -10, 10, 5, electron_mass, 0, solver = 2, e_vectors = True)
     
     #print("square well basis")
-    print("square well")
-    run(square_well_potential, -0.3, 0.3, 10, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)
-    
     print("harmonic oscillator")
-    run(ho_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
+    run(ho_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values= True, e_vectors = True)
     
-    #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
+    #print("harmonic oscillator")
+    #run(ho_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values = True, e_vectors = True)
+    
+    w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 1)
     #wvfctn = np.zeros(len(w.xPoints))
     #for i in range(len(w.xPoints)):
     #    wvfctn[i] = w.HO_wavefunction(w.xPoints[i],1)
@@ -380,8 +340,9 @@ if (__name__ == "__main__"):
     #plt.show()
         
     
-    #w.matrix_maker()
-    #print(w.hamiltonian)
+    w.matrix_maker()
+    print(w.hamiltonian)
+
 
 
 
