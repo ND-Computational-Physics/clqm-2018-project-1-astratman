@@ -143,7 +143,6 @@ class Ho_Solver:
         for i in range(self.n_steps):
             self.xPoints[i] = i*self.h + self.xmin
     
-    
     def HO_wavefunction(self,x,n):
         """
         Defines the harmonic oscillator wavefunction
@@ -154,7 +153,6 @@ class Ho_Solver:
             n (int): index of hermite polynomial and of wavefunction
         Returns:
             value of wavefunction (float)
-
         """
         curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
 
@@ -164,7 +162,7 @@ class Ho_Solver:
 
     def HO_matrix(self):
         """
-        Creates a matrix with different harmonic oscillator wavefunctions evaluated at a vector of xPoints
+        Creates a matrix with different harmonic oscillator wavefunctions evaluated at a vector of xPoints to use for a change of basis
         
         Arguments:
         n_steps(int) - number of rows, each row corresponds to different wavefunctions evaluated at the same point
@@ -193,7 +191,6 @@ class Ho_Solver:
             ElementM = np.sqrt(j)*np.sqrt(j-1)
         else:
             ElementM = 0
-        #set hbar = 1, omega = 1
         return prefactor*ElementM
 
     def integrand(self,x,i,j):
@@ -231,9 +228,7 @@ class Ho_Solver:
         Returns: 
         w[0] (float) - the integrated wavefunction at a point
         """
-        #print("i = ", i, "j = ", j)
         potential_value = integrate.quad(self.integrand,self.xmin,self.xmax,args=(i,j))
-        #print("potential=",potential_value[0])
         return potential_value[0]
 
     def matrix_element_finder(self,i,j): 
@@ -266,7 +261,6 @@ class Ho_Solver:
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
-        
         #NORMALIZE THE EIGENVECTORS?
 
 def nrg_plot(psi, n, m = None):
@@ -285,13 +279,9 @@ def nrg_plot(psi, n, m = None):
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
         eigenvectors = np.transpose(eigenvectors)
-        #print("eigenvectors")
-        #print(eigenvectors)
     else:
-        #Here, may want to cut out the buffer rows of the matrix (i.e the eigenvectors with just one element)
         eigenvectors = psi.eigenvectors
-        #print("eigenvectors")
-    
+     
     #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
     if m == None:
         plt.plot(psi.xPoints,eigenvectors[n-1])
@@ -368,9 +358,6 @@ if (__name__ == "__main__"):
     def ho_potential(x):
         return (1/2)*x**2*electron_mass
      
-
-    #run(ho_potential, -1, 1, 100, electron_mass, 1, x_points = True, e_values = True, e_vectors = True)
-    #print('buffer line')
     
     #Need to define omega as 1/mass**2
     #print("harmonic oscillator basis")
@@ -381,7 +368,8 @@ if (__name__ == "__main__"):
     #run(square_well_potential, -1, 1, 10, electron_mass, 1, m = 5, solver = 2, e_values= True, e_vectors = True)
     
     #print("harmonic oscillator")
-    run(ho_potential, -1, 1, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
+    run(square_well_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
+    run(ho_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
     
     #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
     #wvfctn = np.zeros(len(w.xPoints))
@@ -394,7 +382,6 @@ if (__name__ == "__main__"):
     
     #w.matrix_maker()
     #print(w.hamiltonian)
-    #Random
 
 
 
