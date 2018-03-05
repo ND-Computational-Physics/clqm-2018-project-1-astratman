@@ -47,7 +47,8 @@ class Discrete_Solver:
         particle_mass (float) - mass of particle in keV
         hbarc is in MeV fm
         """
-        self.potential = potential
+        self.potential = potential[0]
+        self.potential_name = potential[1]
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
@@ -128,7 +129,8 @@ class Ho_Solver:
         eigenvalues(float array) - a 1D array of the eigenvalues for our potential
         eigenvectors(float array) - a 2D array of eigenevectors for our potential
         """
-        self.potential = potential
+        self.potential = potential[0]
+        self.potential_name = potential[1]
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = 100 #want to be rows
@@ -286,12 +288,18 @@ def nrg_plot(psi, n, m = None):
     #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
     if m == None:
         plt.plot(psi.xPoints,eigenvectors[n-1])
+        name = "n = " + str(n) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
+
     else:
         for i in range(n,m+1):
             plt.plot(psi.xPoints,eigenvectors[i-1])
+        name = "n = " + str(n) + " - " + str(m) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
 
+
+    plt.title(name)
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
+    plt.axis('tight')
     plt.show()
 
 
@@ -359,21 +367,24 @@ if (__name__ == "__main__"):
     #Test Case 1: The infinite square well potential
     def square_well_potential(x):
         return 0
+    square_well = (square_well_potential, "Square Well")
 
+    
     #Test Case 2: The harmonic oscillator potential
     def ho_potential(x):
-        return (1/2)*electron_mass*(omega**2)*(x**2)
-     
+        return (1/2)*electron_mass*(omega**2)*(x**2) 
+    ho = (ho_potential,"Harmonic Oscillator")
+    
     
     #Need to define omega as 1/mass**2
     #print("harmonic oscillator basis")
     
-    print("square well")
+    print(ho[1])
     print("square well basis")
-    run(ho_potential, -0.3, 0.3, 100, electron_mass, 100, solver = 1)#, hamiltonian = True)
+    run(ho, -0.3, 0.3, 100, electron_mass, 1, solver = 1)
     
     print("harmonic oscillator")
-    run(ho_potential, -0.3, 0.3, 10, electron_mass, 10, solver = 2, hamiltonian = True)
+    run(ho, -0.3, 0.3, 10, electron_mass, 1, m = 2, solver = 2)
     
     #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
     #wvfctn = np.zeros(len(w.xPoints))
