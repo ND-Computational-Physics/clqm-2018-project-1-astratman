@@ -104,6 +104,7 @@ class Discrete_Solver:
         for i in range(0, len(self.work_eigenvectors)):
             self.work_eigenvectors[i] = (1/np.sqrt(self.h)) * self.work_eigenvectors[i]
         self.eigenvectors = np.delete(self.work_eigenvectors,[0,1],0)
+
             
 class Ho_Solver:
     def __init__(self, potential, xmin, xmax, n_functions, particle_mass, omega):
@@ -261,7 +262,7 @@ class Ho_Solver:
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
-        #NORMALIZE THE EIGENVECTORS?
+        
 
 def nrg_plot(psi, n, m = None):
     """
@@ -316,6 +317,10 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     hamiltonian(bool) [OPTIONAL] - if True, prints the a array
     plot (None) [OPTIONAL] - if None, plots the wavefunction within the potential
     """
+    if n > dim-1 or ( m != None and m > dim-1 ):
+        print("The value of \'n\' must be less than the value of \'dim-1\'.")
+        return
+    
     if solver == 1:
         #note, here dim is the number of steps taken
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
@@ -362,14 +367,13 @@ if (__name__ == "__main__"):
     
     #Need to define omega as 1/mass**2
     #print("harmonic oscillator basis")
-    #run(ho_potential, -10, 10, 5, electron_mass, 0, solver = 2, e_vectors = True)
     
-    #print("square well basis")
     print("square well")
-    run(square_well_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)
+    print("square well basis")
+    run(ho_potential, -0.3, 0.3, 100, electron_mass, 100, solver = 1)#, hamiltonian = True)
     
     print("harmonic oscillator")
-    run(ho_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)
+    run(ho_potential, -0.3, 0.3, 10, electron_mass, 10, solver = 2, hamiltonian = True)
     
     #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
     #wvfctn = np.zeros(len(w.xPoints))
