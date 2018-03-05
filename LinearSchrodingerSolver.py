@@ -88,16 +88,16 @@ class Discrete_Solver:
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
-        self.a = np.zeros((self.n_steps+1,self.n_steps+1))
+        self.hamiltonian = np.zeros((self.n_steps+1,self.n_steps+1))
         for i in range(1, self.n_steps):
             for j in range(1, self.n_steps):
-                self.a[i][j] = self.matrix_element_finder(i,j)
+                self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
 
     def matrix_solver(self):
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
-        self.eigenvalues, self.work_eigenvectors = np.linalg.eigh(self.a)
+        self.eigenvalues, self.work_eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.work_eigenvectors = np.transpose(self.work_eigenvectors)
         
         #Normalization of the eigenvectors
@@ -366,7 +366,7 @@ if (__name__ == "__main__"):
     
     #print("square well basis")
     print("square well")
-    run(square_well_potential, -0.3, 0.3, 10, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)
+    run(square_well_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)
     
     print("harmonic oscillator")
     run(ho_potential, -0.3, 0.3, 5, electron_mass, 1, m = 5, solver = 2, hamiltonian = True)#, hamiltonian = True)

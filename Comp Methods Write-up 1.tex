@@ -1,0 +1,148 @@
+%\documentclass[12pt, oneside]{article}   	% use "amsart" instead of "article" for AMSLaTeX format
+%\usepackage{geometry}                		% See geometry.pdf to learn the layout options. There are lots.
+%\geometry{letterpaper}                   		% ... or a4paper or a5paper or ... 
+%\geometry{landscape}                		% Activate for rotated page geometry
+%\usepackage[parfill]{parskip}    		% Activate to begin paragraphs with an empty line rather than an indent
+%\usepackage{graphicx}				% Use pdf, png, jpg, or eps§ with pdflatex; use eps in DVI mode
+
+\documentclass[%
+ reprint,
+%superscriptaddress,
+%groupedaddress,
+%unsortedaddress,
+%runinaddress,
+%frontmatterverbose, 
+%preprint,
+%showpacs,preprintnumbers,
+%nofootinbib,
+%nobibnotes,
+%bibnotes,
+ amsmath,amssymb,
+ aps,
+%pra,
+%prb,
+%rmp,
+%prstab,
+%prstper,
+%floatfix,
+]{revtex4-1}
+
+\usepackage{graphicx}% Include figure files
+\usepackage{dcolumn}% Align table columns on decimal point
+\usepackage{bm}% bold math
+%\usepackage{hyperref}% add hypertext capabilities
+%\usepackage[mathlines]{lineno}% Enable numbering of text and display math
+%\linenumbers\relax % Commence numbering lines
+
+%\usepackage[showframe,%Uncomment any one of the following lines to test 
+%%scale=0.7, marginratio={1:1, 2:3}, ignoreall,% default settings
+%%text={7in,10in},centering,
+%%margin=1.5in,
+%%total={6.5in,8.75in}, top=1.2in, left=0.9in, includefoot,
+%%height=10in,a5paper,hmargin={3cm,0.8in},
+%]{geometry}
+
+\usepackage{mathrsfs}
+\usepackage{amsmath}
+
+\begin{document}
+\bibliographystyle{unsrtnat}
+
+\preprint{APS/123-QED}
+
+\title{Solving the Time-Independent Schr\"{o}dinger Equation Computationally}
+
+\author{Anne Stratman}
+\affiliation{%
+Computational Lab in Quantum Mechanics, Spring 2018, University of Notre Dame}%
+
+\maketitle								% TeX will automatically convert eps --> pdf in pdflatex		
+%\usepackage{amssymb}
+
+%SetFonts
+
+%SetFonts
+
+
+%\title{Brief Article}
+%\author{The Author}
+%\date{}							% Activate to display a given date or no date
+%\maketitle
+%\section{}
+%\subsection{}
+
+\noindent \textbf{Introduction: Discrete Basis}\\
+
+\noindent The Schrodinger equation, given by
+\begin{equation}
+-\frac{\hbar^2}{2m}\frac{d^2}{dx^2}\psi(x)+V(x)\psi(x)=E\psi(x)
+\end{equation}
+
+\noindent can be solved as a matrix diagonalization problem.  This problem can be solved in a discrete basis, or a harmonic oscillator basis.  The solution in the discrete basis is found using inner products of distinct points ($\langle x_i|H|x_j\rangle$).  To solve the problem in the discrete basis, one rewrites the second derivative in the Schrodinger equation in terms of the value of $\psi$ at three discrete points.  The resulting equation can then be used to define diagonal and nondiagonal matrix elements.  Each of these matrix elements is evaluated at a discrete points, and the resulting matrix, is diagonalized.  This gives the Hamiltonian for the potential, or a set of eigenvalues and eigenvectors which correspond to the allowed energies and their wavefunctions.  To begin this process, the second derivative can be rewritten as
+\begin{equation}
+f''=\frac{f(x+h)-2f(x)+f(x-h)}{h^2}+O(h^2)
+\end{equation}
+\noindent where \textit{h} is the step size.  Next, we can define minimum and maximum values for the variable \textit{x}, \textit{R}$_{min}$ and \textit{R}$_{max}$, respectively.  For a given number of steps \textit{N}, the step size \textit{h} can be defined by
+\begin{equation}
+h=\frac{R_{max}-R_{min}}{N}
+\end{equation}
+
+\noindent Defining an arbitrary value of \textit{x} as \textit{x}=\textit{R}$_{min}$+\textit{kh}, \textit{k}=1,2,...,\textit{N}$_{step}$-1, the Schrodinger equation can be rewritten for \textit{x}$_k$ as
+\begin{multline}
+-\frac{\hbar^2}{2m}\frac{\psi(x_k+h)-2\psi(x_k)+\psi(x_k-h)}{h^2}+V(x)\psi(x_k)\\
+=E\psi(x_k)
+\end{multline}
+\noindent or, more compactly,
+\begin{equation}
+-\frac{\hbar^2}{2m}\frac{\psi_{k+1}-2\psi_k+\psi_{k-1}}{h^2}+V_k\psi_k=E\psi_k
+\end{equation}
+\noindent where \textit{$\psi$}$_k$=\textit{$\psi$}(\textit{x}$_k$) and \textit{$\psi$}$_{k\pm1}$=\textit{$\psi$}(\textit{x}$_k$$\pm$\textit{h}).  Next, we can define diagonal matrix elements:
+\begin{equation}
+d_k=\frac{\hbar^2}{2m}\frac{2}{h^2}+V_k
+\end{equation}
+\noindent and non-diagonal matrix elements:
+\begin{equation}
+e_k=-\frac{\hbar^2}{2m}\frac{1}{h^2}
+\end{equation}
+
+\noindent This gives the following form for the Schrodinger equation:
+\begin{equation}
+d_k\psi_k+e_{k-1}\psi_{k-1}+e_{k+1}\psi_{k+1}=E\psi_k
+\end{equation}
+\noindent and allows us to solve the Schrodinger equation as a matrix eigenvalue problem.\\
+
+\noindent \textbf{Introduction: Harmonic Oscillator Basis}\\
+
+\noindent The harmonic oscillator basis solution to the Schrodinger equation differs from the discrete basis in that the harmonic oscillator basis solution uses inner products of wavefunctions ($\langle\psi_m|H|\psi_n\rangle$) to find the matrix elements, and transforms the resulting Hamiltonian into the harmonic oscillator basis.  The solutions to the harmonic oscillator are given by the equation
+\begin{equation}
+\psi_n(x)=\Bigg{(}\frac{m\omega}{\pi\hbar}\Bigg{)}^{1/4}\frac{1}{\sqrt{2^n n!}}H_n(\xi)e^{-\xi^2/2}
+\end{equation}
+\noindent where
+\begin{equation}
+\xi=\sqrt{\frac{m\omega}{\hbar}}x
+\end{equation}
+The matrix elements are found by taking the inner product $\langle$\textit{m}$|$\textit{H}$|$\textit{n}$\rangle$, which yields
+\begin{multline}
+\frac{1}{2m}\langle n|p^2|m \rangle + \langle n|V|m \rangle \\
+=-\frac{\hbar\omega}{4}[\sqrt{m+1}\sqrt{m+2}\delta_{n,m+2}-\sqrt{m+1}\sqrt{m+1}\delta_{m,n}\\
+-\sqrt{m}\sqrt{m}\delta{m,n}+\sqrt{m}\sqrt{m+1}\delta_{n,m-2}] \\
++ \int_{-\infty}^{\infty}\psi_n^*(x)V(x)\psi_m(x)dx
+\end{multline}
+After the matrix elements are found, the resulting matrix is diagonalized to give the Hamiltonian, which has dimensions (number of wavefunctions, number of wavefunctions).  This matrix is then multiplied by a transformation matrix with dimensions (number of steps, number of wavefunctions) to give the solution in the harmonic oscillator basis.\\
+
+\noindent \textbf{Programming}\\
+
+\noindent We structured our code by defining two classes, one for the discrete basis and one for the harmonic oscillator basis.  Both classes have attributes potential (the potential function), \textit{x}$_{min}$, \textit{x}$_{max}$, number of steps (used for determining matrix dimensions), particle mass, \textit{h} (to determine the step size), and xPoints (to determine the points to evaluate the wavefunction at).  The harmonic oscillator class also has attributes omega and hbar.\\
+
+\noindent The discrete class includes separate functions for finding each element of the matrix, creating the matrix, and diagonalizing the matrix.  The ``matrix element finder" function uses equations (6) and (7) to find the diagonal and off-diagonal matrix elements, respectively.  The ``matrix maker" function creates a zero matrix of dimensions (n steps + 1, n steps + 1).  This function then calls ``matrix element finder" to fill in the diagonal and off-diagonal elements of the matrix, giving the Hamiltonian.  The ``matrix solver" function uses Numpy's ``linalg.eigh" function to diagonalize the Hamiltonian, and then takes the transpose of this matrix, giving the eigenvectors and eigenvalues.\\
+
+\noindent The harmonic oscillator class first includes a function for defining the harmonic oscillator wavefunction.  This function calls a separate module to evaluate Hermite polynomials.  The momentum and potential inner products corresponding to the Hamiltonian are defined in separate functions.  In addition, a function for defining (NOT integrating) the integrand in the potential term is defined separately.  A ``matrix element finder" function adds the momentum operator and potential operator terms, and ``matrix maker" and ``matrix solver" functions are defined similarly to those in the discrete class.  The zero matrix initially created by ``matrix maker" has dimensions (number of functions, number of functions).\\
+
+\noindent The plotting function, defined outside the two classes, includes a component for transforming the Hamiltonian given by the harmonic oscillator solver into the harmonic oscillator basis.  The transformation component takes the Numpy dot product of a transformation matrix and the eigenvector matrix of given by the harmonic oscillator solver.  The transformation matrix has dimensions (number of steps, number of functions), with elements representing each of the harmonic oscillator functions evaluated at a different point; thus multiplying the transformation matrix and the eigenvector matrix gives the solution in the harmonic oscillator basis.\\
+
+\noindent \textbf{Analysis of Correctness}\\
+
+\noindent One way to know a program gives the correct results is to use the program to solve problems with a know solution.  We compared the solutions given by our program to the known solutions for the infinite square well and the harmonic oscillator.  The plots of our solutions are shown below:
+
+
+\end{document}
