@@ -39,19 +39,30 @@ class Discrete_Solver:
     def __init__(self, potential, xmin, xmax, n_steps, particle_mass):
         """
         Arguments:
+        \Initialized\
         self (obj)
-        potential(function) - potential function to use in solving the NLS
+        potential(tuple (function, string)) - potential function to use in solving the NLS
         xmin(float) - left bound of position
         xmax(float) - right bound of position
         n_steps(int) - -number of increments in interval
         particle_mass (float) - mass of particle in keV
+        
+        \Assigned\
+        h(float) - the spacing between each x point
+        xPoints(float array) - a 1D array of x points
+        hamiltonian(float array) - The hamiltonian operator matrix (2D array)
+        eigenvalues(float array) - a 1D array of the eigenvalues for our potential
+        eigenvectors(float array) - a 2D array of eigenevectors for our potential
+        
         hbarc is in MeV fm
         """
         self.potential = potential[0]
         self.potential_name = potential[1]
+        
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = n_steps
+        
         self.mass = particle_mass
 
         self.h = (self.xmax-self.xmin)/self.n_steps
@@ -98,13 +109,13 @@ class Discrete_Solver:
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
-        self.eigenvalues, self.work_eigenvectors = np.linalg.eigh(self.hamiltonian)
-        self.work_eigenvectors = np.transpose(self.work_eigenvectors)
+        self.eigenvalues, work_eigenvectors = np.linalg.eigh(self.hamiltonian)
+        work_eigenvectors = np.transpose(work_eigenvectors)
         
         #Normalization of the eigenvectors
-        for i in range(0, len(self.work_eigenvectors)):
-            self.work_eigenvectors[i] = (1/np.sqrt(self.h)) * self.work_eigenvectors[i]
-        self.eigenvectors = np.delete(self.work_eigenvectors,[0,1],0)
+        for i in range(0, len(work_eigenvectors)):
+            work_eigenvectors[i] = (1/np.sqrt(self.h)) * work_eigenvectors[i]
+        self.eigenvectors = np.delete(work_eigenvectors,[0,1],0)
 
             
 class Ho_Solver:
@@ -113,7 +124,7 @@ class Ho_Solver:
         Attributes:
         \Initialized\
         self (obj)
-        potential(function) - potential function to use in solving the NLS
+        potential(tuple (function, string)) - potential function to use in solving the NLS
         xmin(float) - left bound of position
         xmax(float) - right bound of position
         n_functions(int) - -number of eigenfunctions to find
@@ -131,10 +142,12 @@ class Ho_Solver:
         """
         self.potential = potential[0]
         self.potential_name = potential[1]
+        
         self.xmin = xmin
         self.xmax = xmax
         self.n_steps = 100 #want to be rows
         self.n_functions = n_functions #want to be columns
+        
         self.mass = particle_mass
         self.omega = omega
         self.pi = np.pi
@@ -216,7 +229,7 @@ class Ho_Solver:
         Hermite2 = hermite.hermite(j,curvy_e)
         psi2 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**j)*scipy.misc.factorial(j))) * Hermite2 * np.exp((-curvy_e**2)/2)
 
-        potential = (1/2) * self.mass * self.omega * (x**2)
+        potential = self.potential(x)
 
         return psi1 * potential * psi2
     
@@ -287,12 +300,12 @@ def nrg_plot(psi, n, m = None):
      
     #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
     if m == None:
-        plt.plot(psi.xPoints,eigenvectors[n-1])
+        plt.plot(psi.xPoints,eigenvectors[n])
         name = "n = " + str(n) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
 
     else:
         for i in range(n,m+1):
-            plt.plot(psi.xPoints,eigenvectors[i-1])
+            plt.plot(psi.xPoints,eigenvectors[i])
         name = "n = " + str(n) + " - " + str(m) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
 
 
@@ -375,16 +388,22 @@ if (__name__ == "__main__"):
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
     
+    #Test case 3: The Delta potential
+    def delta_potential(x):
+        return 10000 * x^5 + x
+    delta = (delta_potential, "Delta Function Potential")
+    
     
     #Need to define omega as 1/mass**2
     #print("harmonic oscillator basis")
     
-    print(ho[1])
-    print("square well basis")
-    run(ho, -0.3, 0.3, 100, electron_mass, 1, solver = 1)
+    #print(ho[1])
+    #print("square well basis")
+    run(square_well, -0.3, 0.3, 10, electron_mass, 3, solver = 2)
+    #run(delta, -0.3, 0.3, 10, electron_mass, 0, solver = 2)
     
-    print("harmonic oscillator")
-    run(ho, -0.3, 0.3, 10, electron_mass, 1, m = 2, solver = 2)
+    #print("harmonic oscillator")
+    run(ho, -0.3, 0.3, 10, electron_mass, 3, solver = 2)
     
     #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
     #wvfctn = np.zeros(len(w.xPoints))
