@@ -18,6 +18,7 @@ Steps:
 
 Tests:
 1. Infinite square well
+2. Harmonic Oscillator
 
 Units:
 hbar = 1
@@ -41,7 +42,7 @@ class Discrete_Solver:
         Arguments:
         \Initialized\
         self (obj)
-        potential(tuple (function, string)) - potential function to use in solving the NLS
+        potential(tuple (function, string)) - potential function to use in solving the LSE, along with its name
         xmin(float) - left bound of position
         xmax(float) - right bound of position
         n_steps(int) - -number of increments in interval
@@ -124,7 +125,7 @@ class Ho_Solver:
         Attributes:
         \Initialized\
         self (obj)
-        potential(tuple (function, string)) - potential function to use in solving the NLS
+        potential(tuple (function, string)) - potential function to use in solving the LSE, along with its name
         xmin(float) - left bound of position
         xmax(float) - right bound of position
         n_functions(int) - -number of eigenfunctions to find
@@ -335,6 +336,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
     plot (None) [OPTIONAL] - if None, plots the wavefunction within the potential
     """
     if n > dim-1 or ( m != None and m > dim-1 ):
+        #Probably should replace this with an error message...
         print("The value of \'n\' must be less than the value of \'dim-1\'.")
         return
     
@@ -347,6 +349,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
     else:
+        #probably should replace this with an error message...
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
     
     potential.matrix_maker()
@@ -385,13 +388,8 @@ if (__name__ == "__main__"):
     
     
     #Run Test Cases
-    run(square_well, -0.3, 0.3, 10, electron_mass, 0, solver = 2)
-    run(ho, -0.3, 0.3, 10, electron_mass, 0, solver = 2)
-
-
-
-
-
-
+    run(ho, -0.3, 0.3, 100, electron_mass, 3, solver = 1)#, e_vectors = True)
+    print('buffer line')
+    run(ho, -0.3, 0.3, 10, electron_mass, 3, solver = 2)#, e_vectors = True)
 
 
