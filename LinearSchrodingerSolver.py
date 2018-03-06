@@ -289,9 +289,6 @@ def nrg_plot(psi, n, m = None):
      
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
     """
-    
-    #PUT THE CHANGE OF BASIS HERE INSTEAD OF IN THE SOLVER
-    
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
         eigenvectors = np.transpose(eigenvectors)
@@ -307,7 +304,6 @@ def nrg_plot(psi, n, m = None):
         for i in range(n,m+1):
             plt.plot(psi.xPoints,eigenvectors[i])
         name = "n = " + str(n) + " - " + str(m) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
-
 
     plt.title(name)
     plt.ylabel('WaveFunction')
@@ -346,7 +342,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         #note, here dim is the number of steps taken
         potential = Discrete_Solver(p_function, xmin, xmax, dim, mass)
     elif solver == 2:
-        #omega = 1/mass**2
         omega = 1
         #note, here dim is the number of functions
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
@@ -388,34 +383,11 @@ if (__name__ == "__main__"):
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
     
-    #Test case 3: The Delta potential
-    def delta_potential(x):
-        return 10000 * x^5 + x
-    delta = (delta_potential, "Delta Function Potential")
     
-    
-    #Need to define omega as 1/mass**2
-    #print("harmonic oscillator basis")
-    
-    #print(ho[1])
-    #print("square well basis")
-    run(square_well, -0.3, 0.3, 10, electron_mass, 3, solver = 2)
-    #run(delta, -0.3, 0.3, 10, electron_mass, 0, solver = 2)
-    
-    #print("harmonic oscillator")
-    run(ho, -0.3, 0.3, 10, electron_mass, 3, solver = 2)
-    
-    #w = Ho_Solver(ho_potential,-5,5,1,electron_mass, 10)
-    #wvfctn = np.zeros(len(w.xPoints))
-    #for i in range(len(w.xPoints)):
-    #    wvfctn[i] = w.HO_wavefunction(w.xPoints[i],1)
-    
-    #plt.plot(w.xPoints,wvfctn)
-    #plt.show()
-        
-    
-    #w.matrix_maker()
-    #print(w.hamiltonian)
+    #Run Test Cases
+    run(square_well, -0.3, 0.3, 10, electron_mass, 0, solver = 2)
+    run(ho, -0.3, 0.3, 10, electron_mass, 0, solver = 2)
+
 
 
 
