@@ -280,7 +280,7 @@ class Ho_Solver:
         self.eigenvectors = np.transpose(self.eigenvectors)
         
 
-def nrg_plot(psi, n, m = None):
+def nrg_plot(psi, solver, n, m = None, energy = None):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
     
@@ -310,10 +310,29 @@ def nrg_plot(psi, n, m = None):
     plt.ylabel('WaveFunction')
     plt.xlabel('Position')
     plt.axis('tight')
-    plt.show()
+    #plt.show()
+
+    if solver == 1:
+        nPoints = []
+        for i in range(len(psi.xPoints)):
+            nPoints.append(i)
+        plt.plot(nPoints, psi.eigenvalues)
+        plt.title(psi.potential_name + " Eigenvalues - Discrete Basis")
+        plt.xlabel('n')
+        plt.ylabel('Energy')
+        #plt.show()
+    elif solver == 2:
+        nPoints = []
+        for i in range(psi.n_functions):
+            nPoints.append(i)
+        plt.plot(nPoints, psi.eigenvalues)
+        plt.title(psi.potential_name + " Eigenvalues - Harmonic Oscillator Basis")
+        plt.xlabel('n')
+        plt.ylabel('Energy')
+        #plt.show()
 
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -368,30 +387,8 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
         print(potential.hamiltonian)
 
     if plot == None:
-        nrg_plot(potential, n, m)
+        nrg_plot(potential, solver, n, m, energy)
 
-    if plot == True:
-        if solver == 1:
-            nPoints = []
-            for i in range(len(potential.xPoints)):
-                nPoints.append(i)
-            plt.plot(nPoints, potential.eigenvalues)
-            plt.title("Eigenvalues - Discrete Basis")
-            plt.xlabel('n')
-            plt.ylabel('Energy')
-            plt.show()
-        elif solver == 2:
-            nPoints = []
-            for i in range(potential.n_functions):
-                nPoints.append(i)
-            plt.plot(nPoints, potential.eigenvalues)
-            plt.title("Eigenvalues - Harmonic Oscillator Basis")
-            plt.xlabel('n')
-            plt.ylabel('Energy')
-            plt.show()
-
-
-   
    
 if (__name__ == "__main__"):
     electron_mass = 511
@@ -414,11 +411,21 @@ if (__name__ == "__main__"):
     
     
     #Run Test Cases
-    run(square_well, -0.3, 0.3, 100, electron_mass, 0, m=5, solver = 1, plot = True)
-    run(square_well, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
-    run(ho, -0.3, 0.3, 100, electron_mass, 0, m=5, solver = 1, plot = True)
-    run(ho, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
-    #run(tan, -0.3, 0.3, 100, electron_mass, 1, m=5, solver = 1 )
-    #run(tan, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2)
+    #for i in range(10,200,20):
+    #    run(square_well, -0.3, 0.3, i, electron_mass, 0, m = None, solver = 1, energy = True)
+    #plt.show()
+    for i in range(5,10):
+        run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
+    plt.show()
+    #for i in range(10,200,20):
+    #    run(ho, -0.3, 0.3, i, electron_mass, 0, m=5, solver = 1, energy = True)
+    #plt.show()
+    for i in range(5,10):
+        run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
+    plt.show()
+    #run(tan, -0.3, 0.3, 100, electron_mass, 1, m=5, solver = 1, plot = True)
+    #run(tan, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
+
+    #run(square_well, -0.3, 0.3, 200, electron_mass, 0, m = None, solver = 1, energy = True)
 
 
