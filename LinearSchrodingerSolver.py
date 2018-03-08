@@ -174,7 +174,7 @@ class Ho_Solver:
         curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
 
         Hermite = hermite.hermite(n,curvy_e)
-        psi = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**n)*scipy.misc.factorial(n))) * Hermite * np.exp(-curvy_e**2/2)
+        psi = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**n)*scipy.misc.factorial(n))) * Hermite * np.exp(-(curvy_e**2)/2)
         return psi
 
     def HO_matrix(self):
@@ -225,10 +225,10 @@ class Ho_Solver:
         curvy_e = np.sqrt(self.mass*self.omega/self.h_bar)*x
 
         Hermite1 = hermite.hermite(i,curvy_e)
-        psi1 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**i)*scipy.misc.factorial(i))) * Hermite1 * np.exp((-curvy_e**2)/2)
+        psi1 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**i)*scipy.misc.factorial(i))) * Hermite1 * np.exp(-(curvy_e**2)/2)
 
         Hermite2 = hermite.hermite(j,curvy_e)
-        psi2 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**j)*scipy.misc.factorial(j))) * Hermite2 * np.exp((-curvy_e**2)/2)
+        psi2 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**j)*scipy.misc.factorial(j))) * Hermite2 * np.exp(-(curvy_e**2)/2)
 
         potential = self.potential(x)
 
@@ -369,6 +369,28 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, solver = 1, x_points = N
 
     if plot == None:
         nrg_plot(potential, n, m)
+
+    if plot == True:
+        if solver == 1:
+            nPoints = []
+            for i in range(len(potential.xPoints)):
+                nPoints.append(i)
+            plt.plot(nPoints, potential.eigenvalues)
+            plt.title("Eigenvalues - Discrete Basis")
+            plt.xlabel('n')
+            plt.ylabel('Energy')
+            plt.show()
+        elif solver == 2:
+            nPoints = []
+            for i in range(potential.n_functions):
+                nPoints.append(i)
+            plt.plot(nPoints, potential.eigenvalues)
+            plt.title("Eigenvalues - Harmonic Oscillator Basis")
+            plt.xlabel('n')
+            plt.ylabel('Energy')
+            plt.show()
+
+
    
    
 if (__name__ == "__main__"):
@@ -385,11 +407,18 @@ if (__name__ == "__main__"):
     def ho_potential(x):
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
+
+    def tangent_potential(x):
+        return np.tan(x)
+    tan = (tangent_potential,"Tangent")
     
     
     #Run Test Cases
-    run(ho, -0.3, 0.3, 100, electron_mass, 3, solver = 1)#, e_vectors = True)
-    print('buffer line')
-    run(ho, -0.3, 0.3, 10, electron_mass, 3, solver = 2)#, e_vectors = True)
+    run(square_well, -0.3, 0.3, 100, electron_mass, 0, m=5, solver = 1, plot = True)
+    run(square_well, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
+    run(ho, -0.3, 0.3, 100, electron_mass, 0, m=5, solver = 1, plot = True)
+    run(ho, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
+    #run(tan, -0.3, 0.3, 100, electron_mass, 1, m=5, solver = 1 )
+    #run(tan, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2)
 
 
