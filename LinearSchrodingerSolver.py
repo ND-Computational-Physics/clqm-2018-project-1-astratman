@@ -245,7 +245,7 @@ class Ho_Solver:
         Returns: 
         w[0] (float) - the integrated wavefunction at a point
         """
-        potential_value = integrate.quad(self.integrand,self.xmin,self.xmax,args=(i,j))
+        potential_value = integrate.quad(self.integrand,-np.inf,np.inf,args=(i,j))
         return potential_value[0]
 
     def matrix_element_finder(self,i,j): 
@@ -280,7 +280,9 @@ class Ho_Solver:
         self.eigenvectors = np.transpose(self.eigenvectors)
         
 
-def nrg_plot(psi, solver, n, m = None, energy = None):
+
+def nrg_plot(psi, solver, n, m = None, energy = False):
+
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
     
@@ -289,6 +291,7 @@ def nrg_plot(psi, solver, n, m = None, energy = None):
     n (int) - lower bound of eigenvectors to plot
      
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
+    energy(bool) [OPTIONAL] - plot the energy vs n (quantum number) values if True
     """
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
@@ -296,39 +299,50 @@ def nrg_plot(psi, solver, n, m = None, energy = None):
     else:
         eigenvectors = psi.eigenvectors
      
-    #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
-    if m == None:
-        plt.plot(psi.xPoints,eigenvectors[n])
-        name = "n = " + str(n) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
-
+    
+    
+    if energy == True:
+        if solver == 1:
+            nPoints = []
+            e_values = []
+            #for i in range(len(psi.xPoints)):
+            for i in range(n,m+1):
+                nPoints.append(i)
+                e_values.append(psi.eigenvalues[i])
+            #plt.plot(nPoints, psi.eigenvalues)
+            plt.plot(nPoints, e_values)
+            plt.title(psi.potential_name + " Eigenvalues - Discrete Basis")
+            plt.xlabel('n')
+            plt.ylabel('Energy')
+            #plt.show()
+        elif solver == 2:
+            nPoints = []
+            e_values = []
+            #for i in range(psi.n_functions):
+            for i in range(n,m+1):
+                nPoints.append(i)
+                e_values.append(psi.eigenvalues[i])
+            #plt.plot(nPoints, psi.eigenvalues)
+            plt.plot(nPoints, psi.eigenvalues)
+            plt.title(psi.potential_name + " Eigenvalues - Harmonic Oscillator Basis")
+            plt.xlabel('n')
+            plt.ylabel('Energy')
+            #plt.show()   
     else:
-        for i in range(n,m+1):
-            plt.plot(psi.xPoints,eigenvectors[i])
-        name = "n = " + str(n) + " - " + str(m) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
+        #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
+        if m == None:
+            plt.plot(psi.xPoints,eigenvectors[n])
+            name = "n = " + str(n) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
 
-    plt.title(name)
-    plt.ylabel('WaveFunction')
-    plt.xlabel('Position')
-    plt.axis('tight')
-    #plt.show()
-
-    if solver == 1:
-        nPoints = []
-        for i in range(len(psi.xPoints)):
-            nPoints.append(i)
-        plt.plot(nPoints, psi.eigenvalues)
-        plt.title(psi.potential_name + " Eigenvalues - Discrete Basis")
-        plt.xlabel('n')
-        plt.ylabel('Energy')
-        #plt.show()
-    elif solver == 2:
-        nPoints = []
-        for i in range(psi.n_functions):
-            nPoints.append(i)
-        plt.plot(nPoints, psi.eigenvalues)
-        plt.title(psi.potential_name + " Eigenvalues - Harmonic Oscillator Basis")
-        plt.xlabel('n')
-        plt.ylabel('Energy')
+        else:
+            for i in range(n,m+1):
+                plt.plot(psi.xPoints,eigenvectors[i])
+            name = "n = " + str(n) + " - " + str(m) + " Solutions to the NLSE for the " + psi.potential_name + " Potential"   
+    
+        plt.title(name)
+        plt.ylabel('Wavefunction')
+        plt.xlabel('Position')
+        plt.axis('tight')
         #plt.show()
 
 
@@ -411,21 +425,27 @@ if (__name__ == "__main__"):
     
     
     #Run Test Cases
+
     #for i in range(10,200,20):
     #    run(square_well, -0.3, 0.3, i, electron_mass, 0, m = None, solver = 1, energy = True)
     #plt.show()
-    for i in range(5,10):
-        run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
-    plt.show()
-    #for i in range(10,200,20):
-    #    run(ho, -0.3, 0.3, i, electron_mass, 0, m=5, solver = 1, energy = True)
+    #for i in range(10,11):
+    #    run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
     #plt.show()
-    for i in range(5,10):
-        run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
-    plt.show()
+    #for i in range(10,200,20):
+    run(square_well, -0.3, 0.3, 200, electron_mass, 0, m=100, solver = 1, energy = True)
+    #plt.show()
+    #for i in range(5,10):
+    #    run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
+    #plt.show()
     #run(tan, -0.3, 0.3, 100, electron_mass, 1, m=5, solver = 1, plot = True)
     #run(tan, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
 
-    #run(square_well, -0.3, 0.3, 200, electron_mass, 0, m = None, solver = 1, energy = True)
+    #run(ho, -0.3, 0.3, 200, electron_mass, 30, m = None, solver = 1)#, energy = True)
+    
+    #run(square_well, -0.3, 0.3, 100, electron_mass, 0, solver = 1)#, e_vectors = True)
+    #print('buffer line')
+    #run(square_well, -0.3, 0.3, 10, electron_mass, 0, solver = 2)#, e_vectors = True)
+    plt.show()
 
 
