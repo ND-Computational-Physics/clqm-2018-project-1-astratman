@@ -467,8 +467,30 @@ if (__name__ == "__main__"):
     #Plot energy v. n of HO potential in HO Solver
     #run(ho, -0.3, 0.3, 20, electron_mass, 0, m=19, solver = 2, energy = True)
     
+    #Plot n=0 HO wavefunction from HO Solver
+    #run(ho,-0.3, 0.3, 10, electron_mass, 0, solver = 2)
+    
+    #Plot n=0 HO wavefunction from Discrete Solver
+    #run(ho,-0.3, 0.3, 100, electron_mass, 0, solver = 1)
+    
+    #Plot n=30 HO wavefunction from Discrete Solver
+    #run(ho,-0.3, 0.3, 100, electron_mass, 30, solver = 1)
+    
     #Plot HO wavefunctions from HO Solver
     #run(ho, -0.3, 0.3, 10, electron_mass, 0, m=2, solver = 2)
+    
+    #Plot HO wavefunctions from Discrete Solver
+    #run(ho, -0.3, 0.3, 100, electron_mass, 0, m=2, solver = 1)
+    
+    #Plot n=0 Square well wavefunction from Discrete Solver
+    #run(square_well,-0.3, 0.3, 100, electron_mass, 0, solver = 1)
+    
+    #Plot n=0 Square well wavefunction from HO Solver
+    #run(square_well,-0.3, 0.3, 100, electron_mass, 0, solver = 1)
+    
+    #Plot Square well wavefunctions from Discrete Solver
+    #run(square_well,-0.3, 0.3, 100, electron_mass, 0, m=2, solver = 1)
+    
     plt.show()
 
 
