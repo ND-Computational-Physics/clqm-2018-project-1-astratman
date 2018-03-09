@@ -426,6 +426,7 @@ if (__name__ == "__main__"):
     #plt.show()
     
     
+    #NOTE: for these test cases, they will run with the current code
     
     #Plot energy v. n of Square well potential in Discrete Solver
     #run(ho, -0.3, 0.3, 200, electron_mass, 0, m=100, solver = 1, energy = True)
