@@ -4,29 +4,7 @@ Ben Riordan
 Jan. 25th, 2018
 Computational Lab in Quantum Mechanics
 
-Steps:
-1. Transform radial Schrodinger equation to a dimensionless? form
-2. Rewrite as a matrix eigenvalue problem
-	a. Set up array of x-values
-	b. Set up equation for potential and evaluate potential at x-values to generate array of potential values
-	c. Construct 1D array of diagonal matrix elements
-	d. Construct 1D array of off-diagonal matrix elements
-	e. Construct matrix
-	f. Use numpy eigensolver to diagonalize matrix
-3. Results: eigenvectors are states, eigenvalues are energies
-4. Write output file with energies and eigenvectors as rows
-
-Tests:
-1. Infinite square well
-2. Harmonic Oscillator
-
-Units:
-hbar = 1
-c = 1
-
-Neutron mass mN*c**2: 938 MeV
-hbar*c = 197 MeV fm
-Units of hbar*c / mN*c**2: MeV fm**2
+Solves the Schrodinger equation for time-independent potentials in a discrete or harmonic oscillator basis
 """
 
 import numpy as np
@@ -54,8 +32,6 @@ class Discrete_Solver:
         hamiltonian(float array) - The hamiltonian operator matrix (2D array)
         eigenvalues(float array) - a 1D array of the eigenvalues for our potential
         eigenvectors(float array) - a 2D array of eigenevectors for our potential
-        
-        hbarc is in MeV fm
         """
         self.potential = potential[0]
         self.potential_name = potential[1]
@@ -85,9 +61,6 @@ class Discrete_Solver:
         Element (float) - calculated ij-th element of matrix
         """
         if i == j:
-            #Potential is evaluated at discrete points
-            #hbar*c = 197
-            #Multiply each term by 1/(2*m)
             Element = 2/((self.h**2)*2*self.mass) + self.potential(self.xPoints[i])
         elif i == j + 1:
             Element = -1/((self.h**2)*2*self.mass)
@@ -113,7 +86,7 @@ class Discrete_Solver:
         self.eigenvalues, work_eigenvectors = np.linalg.eigh(self.hamiltonian)
         work_eigenvectors = np.transpose(work_eigenvectors)
         
-        #Normalization of the eigenvectors
+        #Normalization of the eigenvectors: 1/np.sqrt(self.h)
         for i in range(0, len(work_eigenvectors)):
             work_eigenvectors[i] = (1/np.sqrt(self.h)) * work_eigenvectors[i]
         self.eigenvectors = np.delete(work_eigenvectors,[0,1],0)
@@ -289,14 +262,16 @@ def nrg_plot(psi, solver, n, m = None, energy = None):
     n (int) - lower bound of eigenvectors to plot
      
     m (int) [OPTIONAL] - upper bound of eigenvectors to plot
+
+    energy(Boolean) [OPTIONAL] - if energy == True, plots eigenvalues
     """
+    #Transform (if necessary) and plot wavefunctions
     if hasattr(psi, 'transform'):
         eigenvectors = np.dot(psi.transform, psi.eigenvectors)
         eigenvectors = np.transpose(eigenvectors)
     else:
         eigenvectors = psi.eigenvectors
-     
-    #The index of eigenvectors messes with the arrangement of the discrete basis solver's matrices
+
     if m == None:
         plt.plot(psi.xPoints,eigenvectors[n])
         name = "n = " + str(n) + " Solution to the NLSE for the " + psi.potential_name + " Potential"
@@ -312,24 +287,26 @@ def nrg_plot(psi, solver, n, m = None, energy = None):
     plt.axis('tight')
     #plt.show()
 
-    if solver == 1:
-        nPoints = []
-        for i in range(len(psi.xPoints)):
-            nPoints.append(i)
-        plt.plot(nPoints, psi.eigenvalues)
-        plt.title(psi.potential_name + " Eigenvalues - Discrete Basis")
-        plt.xlabel('n')
-        plt.ylabel('Energy')
-        #plt.show()
-    elif solver == 2:
-        nPoints = []
-        for i in range(psi.n_functions):
-            nPoints.append(i)
-        plt.plot(nPoints, psi.eigenvalues)
-        plt.title(psi.potential_name + " Eigenvalues - Harmonic Oscillator Basis")
-        plt.xlabel('n')
-        plt.ylabel('Energy')
-        #plt.show()
+    #Plot number of points (discrete) or number of basis functions (HO) vs. eigenvalues
+    if energy == True:
+        if solver == 1:
+            nPoints = []
+            for i in range(len(psi.xPoints)):
+                nPoints.append(i)
+            plt.plot(nPoints, psi.eigenvalues)
+            plt.title(psi.potential_name + " Eigenvalues - Discrete Basis")
+            plt.xlabel('n')
+            plt.ylabel('Energy')
+            #plt.show()
+        elif solver == 2:
+            nPoints = []
+            for i in range(psi.n_functions):
+                nPoints.append(i)
+            plt.plot(nPoints, psi.eigenvalues)
+            plt.title(psi.potential_name + " Eigenvalues - Harmonic Oscillator Basis")
+            plt.xlabel('n')
+            plt.ylabel('Energy')
+            #plt.show()
 
 
 def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
@@ -355,7 +332,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
     plot (None) [OPTIONAL] - if None, plots the wavefunction within the potential
     """
     if n > dim-1 or ( m != None and m > dim-1 ):
-        #Probably should replace this with an error message...
         print("The value of \'n\' must be less than the value of \'dim-1\'.")
         return
     
@@ -368,7 +344,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
     else:
-        #probably should replace this with an error message...
         print("Change the solver variable: (1) - Discrete Solver, (2) - Harmonic Oscillator Solver")
     
     potential.matrix_maker()
@@ -405,27 +380,34 @@ if (__name__ == "__main__"):
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
 
+    #Test Case 3: The tangent potential
     def tangent_potential(x):
         return np.tan(x)
     tan = (tangent_potential,"Tangent")
     
     
     #Run Test Cases
+    #Eigenvalue plots
     #for i in range(10,200,20):
-    #    run(square_well, -0.3, 0.3, i, electron_mass, 0, m = None, solver = 1, energy = True)
+    #    run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 1, energy = True)
     #plt.show()
-    for i in range(5,10):
-        run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
-    plt.show()
+    #for i in range(5,10):
+    #    run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
+    #3plt.show()
     #for i in range(10,200,20):
-    #    run(ho, -0.3, 0.3, i, electron_mass, 0, m=5, solver = 1, energy = True)
+    #    run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 1, energy = True)
     #plt.show()
-    for i in range(5,10):
-        run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
-    plt.show()
+    #for i in range(5,10):
+    #    run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
+    #plt.show()
     #run(tan, -0.3, 0.3, 100, electron_mass, 1, m=5, solver = 1, plot = True)
     #run(tan, -0.3, 0.3, 10, electron_mass, 0, m=5, solver = 2, plot = True)
 
     #run(square_well, -0.3, 0.3, 200, electron_mass, 0, m = None, solver = 1, energy = True)
+
+    #Point density plot
+    for i in range(1,10):
+        run(ho, -0.01 * i, 0.01 * i, 100, electron_mass, 0, solver = 1)
+    plt.show()
 
 

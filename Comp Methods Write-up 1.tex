@@ -80,7 +80,7 @@ Computational Lab in Quantum Mechanics, Spring 2018, University of Notre Dame}%
 -\frac{\hbar^2}{2m}\frac{d^2}{dx^2}\psi(x)+V(x)\psi(x)=E\psi(x)
 \end{equation}
 
-\noindent can be solved as a matrix diagonalization problem.  This problem can be solved in a discrete basis, or a harmonic oscillator basis.  The solution in the discrete basis is found using inner products of distinct points ($\langle x_i|H|x_j\rangle$).  To solve the problem in the discrete basis, one rewrites the second derivative in the Schrodinger equation in terms of the value of $\psi$ at three discrete points.  The resulting equation can then be used to define diagonal and nondiagonal matrix elements.  Each of these matrix elements is evaluated at a discrete points, and the resulting matrix, is diagonalized.  This gives the Hamiltonian for the potential, or a set of eigenvalues and eigenvectors which correspond to the allowed energies and their wavefunctions.  To begin this process, the second derivative can be rewritten as
+\noindent can be solved as a matrix diagonalization problem in a discrete basis or a harmonic oscillator basis.  The solution in the discrete basis is found using inner products of distinct points ($\langle x_i|H|x_j\rangle$).  To solve the problem in the discrete basis, one rewrites the second derivative in the Schrodinger equation in terms of the value of $\psi$ at three points.  The resulting equation can then be used to define diagonal and nondiagonal matrix elements.  Each of these matrix elements is evaluated at a discrete point, and the resulting matrix is diagonalized.  This gives the Hamiltonian for the potential - a set of eigenvalues and eigenvectors that correspond to the allowed energies and their wavefunctions.  To begin this process, the second derivative can be rewritten as
 \begin{equation}
 f''=\frac{f(x+h)-2f(x)+f(x-h)}{h^2}+O(h^2)
 \end{equation}
@@ -122,6 +122,8 @@ d_k\psi_k+e_{k-1}\psi_{k-1}+e_{k+1}\psi_{k+1}=E\psi_k
 \caption{Harmonic oscillator solved in the discrete basis, using 100 points}
 \end{figure}
 
+\pagebreak
+
 \noindent \textbf{Introduction: Harmonic Oscillator Basis}\\
 
 \noindent The harmonic oscillator basis solution to the Schrodinger equation uses inner products of wavefunctions ($\langle\psi_m|H|\psi_n\rangle$) to find the matrix elements, and transforms the resulting Hamiltonian into the harmonic oscillator basis.  The solutions to the harmonic oscillator are given by the equation
@@ -158,11 +160,11 @@ After the matrix elements are found, the resulting matrix is diagonalized to giv
 
 \noindent The harmonic oscillator class first includes a function for defining the harmonic oscillator wavefunction.  This function calls a separate module to evaluate Hermite polynomials.  The momentum and potential inner products corresponding to the Hamiltonian are defined in separate functions.  In addition, a function for defining (NOT integrating) the integrand in the potential term is defined separately.  A ``matrix element finder" function adds the momentum operator and potential operator terms, and ``matrix maker" and ``matrix solver" functions are defined similarly to those in the discrete class.  The zero matrix initially created by ``matrix maker" has dimensions (number of functions, number of functions).\\
 
-\noindent The plotting function, defined outside the two classes, includes a component for transforming the Hamiltonian given by the harmonic oscillator solver into the harmonic oscillator basis.  The transformation component takes the Numpy dot product of a transformation matrix and the eigenvector matrix of given by the harmonic oscillator solver.  The transformation matrix has dimensions (number of steps, number of functions), with elements representing each of the harmonic oscillator functions evaluated at a different point; thus multiplying the transformation matrix and the eigenvector matrix gives the solution in the harmonic oscillator basis.\\
+\noindent The plotting function, defined outside the two classes, includes a component for transforming the Hamiltonian given by the harmonic oscillator solver into the harmonic oscillator basis.  The transformation component takes the Numpy dot product of a transformation matrix and the eigenvector matrix given by the harmonic oscillator solver.  The transformation matrix has dimensions (number of steps, number of functions), with elements representing each of the harmonic oscillator functions evaluated at a different point; thus multiplying the transformation matrix and the eigenvector matrix gives the solution in the harmonic oscillator basis.\\
 
 \noindent \textbf{Analysis of Correctness}\\
 
-\noindent To test whether this program gives the correct results, we used our code to solve problems with known solutions, specifically the infinite square well and the harmonic oscillator.  Various plots of our solutions are shown throughout the report.  \textit{Figure 5} and \textit{Figure 6}, which show the correct solutions to the infinite square well and the harmonic oscillator, respectively, are taken from Griffiths' \textit{Introduction to Quantum Mechanics}.\\
+\noindent To test whether this program gives the correct results, we used our code to solve two problems with known solutions - the infinite square well and the harmonic oscillator.  Various plots of our solutions are shown throughout the report.\\
 
 \noindent As shown in \textit{Figure 3}, the solution to the square well potential solved in the harmonic oscillator basis is not correct, which is expected.  When solving the TISE in the harmonic oscillator basis, one should integrate the inner product out to positive and negative infinity (the SciPy ``integrate.quad" function does this).  When solving the square well, however, one should just integrate the inner products between the endpoints of the well.  Therefore, the limits of integration in the harmonic oscillator basis are much too large for solving square well potentials, and should not yield the correct results.\\
 
@@ -177,7 +179,9 @@ After the matrix elements are found, the resulting matrix is diagonalized to giv
 \caption{Eigenvalues of the harmonic oscillator potential, solved in the harmonic oscillator basis using 5 basis functions}
 \end{figure}
 
-\noindent To achieve reasonable numerical precision, at least 100 points should be used when solving a potential in the discrete basis.  This yields at least 100 points at which the code can evaluate the wavefunction solutions and plot the results.  \textit{Figure 5} and \textit{Figure 6} show the convergence of the eigenvalues for different numbers of points for the square well and harmonic oscillator potentials, respectively, solved in the discrete basis.  In the harmonic oscillator basis, SciPy's ``integrate.quad" function integrates the inner products of wavefunctions and the potential out to positive and negative infinity, which effectively takes the place of evaluating the inner products at many discrete points, as is done in the discrete basis solver.  Solutions to potentials in the harmonic oscillator basis vary depending on the number of basis functions used, and because the inner products are already integrated out to extremely large values, a much smaller number of basis functions yields an accurate solution.  We found accurate solutions using as few as five basis functions.\\
+\noindent To achieve reasonable numerical precision, at least 100 points should be used when solving a potential in the discrete basis.  This yields at least 100 points at which the code can evaluate the wavefunction solutions and plot the results.  \textit{Figure 7} and \textit{Figure 8} show the convergence of the eigenvalues for different numbers of points for the square well and harmonic oscillator potentials, respectively, solved in the discrete basis.  As shown in \textit{Figure 8}, the eigenvalues of the harmonic oscillator potential appear linear at first, then parabolic, and are ``choppy" near \textit{xmax}.  This is due to the fact that the actual harmonic oscillator wavefunction goes to zero at infinity, but the discrete basis only evaluates the wavefunction out to a finite \textit{xmin} and \textit{xmax}.  Therefore, the harmonic oscillator potential is restricted as if it were a square well potential instead, so the behavior of its eigenvalues approaches the behavior of the square well eigenvalues as \textit{x} increases.\\
+
+\noindent In the harmonic oscillator basis, SciPy's ``integrate.quad" function integrates the inner products of wavefunctions and the potential out to positive and negative infinity, which effectively takes the place of evaluating the inner products at many discrete points, as is done in the discrete basis solver.  Eigenvalues of the two test potentials in the harmonic oscillator basis are not plotted, however, since the solution to the square well potential in the harmonic oscillator basis is known to be incorrect, while the eigenvalues of the harmonic oscillator potential are simply a straight line.  Solutions to potentials in the harmonic oscillator basis vary depending on the number of basis functions used, and because the inner products are already integrated out to extremely large values, a much smaller number of basis functions yields an accurate solution.  We found accurate solutions using as few as five basis functions.\\
 
 \begin{figure}
 \includegraphics[width=9cm]{DiscreteSquareWellEigenvaluesConvergence}
@@ -185,7 +189,14 @@ After the matrix elements are found, the resulting matrix is diagonalized to giv
 \end{figure}
 \begin{figure}
 \includegraphics[width=9cm]{DiscreteHarmonicOscillatorEigenvaluesConvergence}
-\caption{Convergence of eigenvalues for the harmonic potential solved in the discrete basis.  Minimum number of steps = 10, maximum number of steps = 190, plotted in increments of 20.}
+\caption{Convergence of eigenvalues for the harmonic oscillator potential solved in the discrete basis.  Minimum number of steps = 10, maximum number of steps = 190, plotted in increments of 20.}
+\end{figure}
+
+\noindent We also varied the point density in our plots.  \textit{Figure 9} shows the ground state solution to the harmonic oscillator, solved in the discrete basis, using 100 points but with different values of \textit{xmin} and \textit{xmax}, thus different point densities.\\
+
+\begin{figure}
+\includegraphics[width=9cm]{DiscreteHarmonicOscillatorPointDensity}
+\caption{Ground state of the harmonic oscillator, solved in the discrete basis with varying point density.}
 \end{figure}
 
 
@@ -206,7 +217,7 @@ After the matrix elements are found, the resulting matrix is diagonalized to giv
 \caption{Tangent potential solved in the harmonic oscillator basis, using 5 basis functions}
 \end{figure}
 
-\noindent We also used this code to solve the tangent potential $V(x) = tan(x)$ in both the discrete and harmonic oscillator bases (\textit{Figure 9} and \textit{Figure 10}).\\
+\noindent We also used this code to solve the tangent potential $V(x) = tan(x)$ in both the discrete and harmonic oscillator bases (\textit{Figure 10} and \textit{Figure 11}).  The \textit{n} = 0 case is not plotted for the discrete basis, since this yields a delta function.\\
 
 \noindent \textbf{Units}\\
 
