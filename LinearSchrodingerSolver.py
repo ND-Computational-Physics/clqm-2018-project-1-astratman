@@ -298,19 +298,21 @@ def nrg_plot(psi, solver, n, m = None, energy = False):
         eigenvectors = np.transpose(eigenvectors)
     else:
         eigenvectors = psi.eigenvectors
-     
-    
     
     if energy == True:
         if solver == 1:
             nPoints = []
             e_values = []
-            #for i in range(len(psi.xPoints)):
             for i in range(n,m+1):
                 nPoints.append(i)
                 e_values.append(psi.eigenvalues[i])
-            #plt.plot(nPoints, psi.eigenvalues)
             plt.plot(nPoints, e_values)
+            
+            #nPoints = []
+            #for i in range(len(psi.xPoints)):
+            #    nPoints.append(i)
+            #plt.plot(nPoints, psi.eigenvalues)
+            
             plt.title(psi.potential_name + " Eigenvalues - Discrete Basis")
             plt.xlabel('n')
             plt.ylabel('Energy')
@@ -318,12 +320,16 @@ def nrg_plot(psi, solver, n, m = None, energy = False):
         elif solver == 2:
             nPoints = []
             e_values = []
-            #for i in range(psi.n_functions):
             for i in range(n,m+1):
                 nPoints.append(i)
                 e_values.append(psi.eigenvalues[i])
+            plt.plot(nPoints, e_values)
+            
+            #nPoints = []
+            #for i in range(psi.n_functions):
+            #    nPoints.append(i)
             #plt.plot(nPoints, psi.eigenvalues)
-            plt.plot(nPoints, psi.eigenvalues)
+            
             plt.title(psi.potential_name + " Eigenvalues - Harmonic Oscillator Basis")
             plt.xlabel('n')
             plt.ylabel('Energy')
@@ -425,6 +431,8 @@ if (__name__ == "__main__"):
     
     
     #Run Test Cases
+    
+    #NOTE: for these first sets of test cases, uncomment the commented lines in nrg_plot and comment the lines above them within the conditional statement.
 
     #for i in range(10,200,20):
     #    run(square_well, -0.3, 0.3, i, electron_mass, 0, m = None, solver = 1, energy = True)
@@ -433,7 +441,7 @@ if (__name__ == "__main__"):
     #    run(square_well, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
     #plt.show()
     #for i in range(10,200,20):
-    run(square_well, -0.3, 0.3, 200, electron_mass, 0, m=100, solver = 1, energy = True)
+    #    run(ho, -0.3, 0.3, i, electron_mass, 0, m = None, solver = 1, energy = True)
     #plt.show()
     #for i in range(5,10):
     #    run(ho, -0.3, 0.3, i, electron_mass, 0, solver = 2, energy = True)
@@ -446,6 +454,21 @@ if (__name__ == "__main__"):
     #run(square_well, -0.3, 0.3, 100, electron_mass, 0, solver = 1)#, e_vectors = True)
     #print('buffer line')
     #run(square_well, -0.3, 0.3, 10, electron_mass, 0, solver = 2)#, e_vectors = True)
+    
+    
+    
+    
+    #Plot energy v. n of Square well potential in Discrete Solver
+    #run(ho, -0.3, 0.3, 200, electron_mass, 0, m=100, solver = 1, energy = True)
+    
+    #Plot energy v. n of HO potential in Discrete Solver
+    #run(ho, -0.3, 0.3, 200, electron_mass, 0, m=100, solver = 1, energy = True)
+    
+    #Plot energy v. n of HO potential in HO Solver
+    #run(ho, -0.3, 0.3, 20, electron_mass, 0, m=19, solver = 2, energy = True)
+    
+    #Plot HO wavefunctions from HO Solver
+    #run(ho, -0.3, 0.3, 10, electron_mass, 0, m=2, solver = 2)
     plt.show()
 
 
