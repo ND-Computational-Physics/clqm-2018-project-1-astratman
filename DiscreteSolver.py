@@ -94,9 +94,10 @@ class Discrete_Solver:
         self.eigenvectors = np.delete(work_eigenvectors,[0,1],0)
 
     def xExpecValMatrix(self):
+        #Need to pad with zeros
         self.positionMatrix = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(self.n_steps+1):
-            for j in range(0,self.n_steps+1):
+        for i in range(1,self.n_steps):
+            for j in range(1,self.n_steps):
                 if i == j:
                     self.positionMatrix[i][j] = 1
         for i in range(len(self.xPoints)):
@@ -107,6 +108,34 @@ class Discrete_Solver:
             elif self.operator == 2:
                 self.positionMatrix[x_index][x_index] = position**2 * self.positionMatrix[x_index][x_index]
 
+    def momentumElementFinder(self,i,j):
+        if i == j:
+            Element = 1j/self.h
+        elif i + 1 == j:
+            Element = -1j/self.h
+        else:
+            Element = 0
+        return Element
+
+    def pExpecValMatrix(self):
+        #Need to pad with zeros?
+        self.momentumMatrix = np.zeros((self.n_steps+1,self.n_steps+1),dtype=np.complex)
+        if self.operator == 1:
+            for i in range(1,self.n_steps):
+                for j in range(1,self.n_steps):
+                    self.momentumMatrix[i][j] = self.momentumElementFinder(i,j)
+        elif self.operator == 2:
+            for i in range(self.n_steps+1):
+                for j in range(self.n_steps+1):
+                    if i == j:
+                        self.momentumMatrix[i][j] = 1
+            for i in range(len(self.xPoints)):
+                x_index = i
+                position = self.xPoints[x_index]
+                #Check this - find KE terms by subtracting potential from diagonal elements of Hamiltonian
+                #then find momentum terms by multiplying by 2m (KE = p^2/2m)
+                self.momentumMatrix[x_index][x_index] = 2*self.mass*(self.hamiltonian[x_index][x_index] - self.potential(position))
+    
 
 def nrg_plot(psi, solver, n, m, energy = False):
     """
@@ -232,10 +261,16 @@ def run(p_function, xmin, xmax, dim, mass, n, m, operator = None, energy = None,
     if plot == None:
         nrg_plot(potential, solver, n, m, energy)
 
-def findExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
+def findxExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
     potential = Discrete_Solver(p_function, xmin, xmax, dim, mass, operator)
     potential.xExpecValMatrix()
     return potential.positionMatrix
+
+def findpExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
+    potential = Discrete_Solver(p_function, xmin, xmax, dim, mass, operator)
+    potential.matrix_maker()
+    potential.pExpecValMatrix()
+    return potential.momentumMatrix
 
 if __name__ == "__main__":
 
@@ -245,10 +280,13 @@ if __name__ == "__main__":
         return 0
     square_well = (square_well_potential, "Square Well")
 
-    print(findExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
+    print(findxExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
+    print(findxExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
+    print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
+    print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
 
-    run(square_well,-0.1,0.1,100,electron_mass,0,5)
-    plt.show()
+    #run(square_well,-0.1,0.1,100,electron_mass,0,5)
+    #plt.show()
 
 
 
