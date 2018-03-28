@@ -91,7 +91,16 @@ class Discrete_Solver:
             work_eigenvectors[i] = (1/np.sqrt(self.h)) * work_eigenvectors[i]
         self.eigenvectors = np.delete(work_eigenvectors,[0,1],0)
 
-def nrg_plot(psi, solver, n, m = None, energy = False):
+    def xExpecVal(n_steps):
+        positionMatrix = np.zeros((n_steps,n_steps))
+        for i in range(0,n_steps):
+            for j in range(0,n_steps):
+                if i == j:
+                    positionMatrix[i][j] = 1
+                positionMatrix[i][j] = x * positionMatrix[i][j]
+        return positionMatrix
+
+def nrg_plot(psi, solver, n, m, energy = False):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
     
@@ -99,7 +108,7 @@ def nrg_plot(psi, solver, n, m = None, energy = False):
     psi (Solver obj) - an object representing a specific hamiltonian
     n (int) - lower bound of eigenvectors to plot
      
-    m (int) [OPTIONAL] - upper bound of eigenvectors to plot
+    m (int) - upper bound of eigenvectors to plot
     energy(bool) [OPTIONAL] - plot the energy eigenvalues vs n (quantum number) values if True
     """
     #Transform (if necessary) and plot wavefunctions
@@ -160,7 +169,7 @@ def nrg_plot(psi, solver, n, m = None, energy = False):
         plt.axis('tight')
         #plt.show()
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def run(p_function, xmin, xmax, dim, mass, n, m, energy = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -172,7 +181,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
     mass (float) - the mass of the particle caught in our potential
     n (int) - lower bound of eigenvectors to plot
     
-    m (int) [OPTIONAL] - upper bound of eigenvectors to plot
+    m (int) - upper bound of eigenvectors to plot
     solver (int) [OPTIONAL] - defines which solver (basis) to use:
                                 (1) = Discrete Solver
                                 (2) = Harmonic Oscillator Solver
