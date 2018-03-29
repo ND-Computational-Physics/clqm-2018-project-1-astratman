@@ -85,16 +85,16 @@ class Discrete_Solver:
         """
         Finds a matrix's eigenvalues and (normalized) eigenvectors
         """
-        self.eigenvalues, work_eigenvectors = np.linalg.eigh(self.hamiltonian)
-        work_eigenvectors = np.transpose(work_eigenvectors)
+        self.eigenvalues, self.column_eigenvectors = np.linalg.eigh(self.hamiltonian)
+        self.row_eigenvectors = np.transpose(self.column_eigenvectors)
         
         #Normalization of the eigenvectors: 1/np.sqrt(self.h)
-        for i in range(0, len(work_eigenvectors)):
-            work_eigenvectors[i] = (1/np.sqrt(self.h)) * work_eigenvectors[i]
-        self.eigenvectors = np.delete(work_eigenvectors,[0,1],0)
+        for i in range(0, len(self.row_eigenvectors)):
+            self.row_eigenvectors[i] = (1/np.sqrt(self.h)) * self.row_eigenvectors[i]
+        self.eigenvectors = np.delete(self.row_eigenvectors,[0,1],0)
 
     def xExpecValMatrix(self):
-        #Need to pad with zeros
+        #Need to pad with zeros?
         self.positionMatrix = np.zeros((self.n_steps+1,self.n_steps+1))
         for i in range(1,self.n_steps):
             for j in range(1,self.n_steps):
@@ -107,6 +107,11 @@ class Discrete_Solver:
                 self.positionMatrix[x_index][x_index] = position * self.positionMatrix[x_index][x_index]
             elif self.operator == 2:
                 self.positionMatrix[x_index][x_index] = position**2 * self.positionMatrix[x_index][x_index]
+
+    def calcxExpecVal(self):
+        working_matrix = np.matmul(self.positionMatrix,self.column_eigenvectors)
+        self.xExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
+        #return xExpecVal
 
     def momentumElementFinder(self,i,j):
         if i == j:
@@ -135,6 +140,14 @@ class Discrete_Solver:
                 #Check this - find KE terms by subtracting potential from diagonal elements of Hamiltonian
                 #then find momentum terms by multiplying by 2m (KE = p^2/2m)
                 self.momentumMatrix[x_index][x_index] = 2*self.mass*(self.hamiltonian[x_index][x_index] - self.potential(position))
+        #print("Momentum matrix =",self.momentumMatrix)
+
+    def calcpExpecVal(self):
+        working_matrix = np.matmul(self.momentumMatrix,self.column_eigenvectors)
+        #print("Working matrix =",working_matrix)
+        self.pExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
+        #print("Momentum expectation value = ",pExpecVal)
+        #return self.pExpecVal
     
 
 def nrg_plot(psi, solver, n, m, energy = False):
@@ -263,14 +276,19 @@ def run(p_function, xmin, xmax, dim, mass, n, m, operator = None, energy = None,
 
 def findxExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
     potential = Discrete_Solver(p_function, xmin, xmax, dim, mass, operator)
+    potential.matrix_maker()
+    potential.matrix_solver()
     potential.xExpecValMatrix()
-    return potential.positionMatrix
+    potential.calcxExpecVal()
+    return potential.xExpecVal
 
 def findpExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
     potential = Discrete_Solver(p_function, xmin, xmax, dim, mass, operator)
     potential.matrix_maker()
+    potential.matrix_solver()
     potential.pExpecValMatrix()
-    return potential.momentumMatrix
+    potential.calcpExpecVal()
+    return potential.pExpecVal
 
 if __name__ == "__main__":
 
@@ -282,8 +300,8 @@ if __name__ == "__main__":
 
     print(findxExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
     print(findxExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
-    print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
-    print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
+    #print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
+    #print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
 
     #run(square_well,-0.1,0.1,100,electron_mass,0,5)
     #plt.show()
