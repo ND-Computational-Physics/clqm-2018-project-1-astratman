@@ -125,9 +125,24 @@ class Ho_Solver:
         Hermite2 = hermite.hermite(j,curvy_e)
         psi2 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**j)*scipy.misc.factorial(j))) * Hermite2 * np.exp(-(curvy_e**2)/2)
 
-        potential = self.potential(x)
-
-        return psi1 * potential * psi2
+        """
+        print(__name__)
+        if __name__ == "matrix_maker":
+            print("pot")
+            v = self.potential(x)
+        elif __name__ == "expectation_position":
+            def pot(): return x
+            v = pot(x)
+        elif __name__ == "expectation_position2":
+            def pot(): return x**2
+            v = pot(x)
+        else:
+            print("It's something else.")
+            v = self.potential(x)
+        """
+        v = self.potential(x)
+        
+        return psi1 * v * psi2
     
     def potential_operator_term(self, i, j):
         """
@@ -173,8 +188,54 @@ class Ho_Solver:
         """
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
-
-def nrg_plot(psi, solver, n, m, energy = False):
+    
+    
+    
+    
+    def expectation_position(self):
+        """
+        Calculates the expetation value of the position for an eigenvector in the solver basis.
+        """
+        v = self.potential
+        def pot(): return x
+        self.potential = pot
+        
+        #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR (i.e. x)
+        self.pos_exp = np.zeros((self.n_functions,self.n_functions))
+        for i in range(0,self.n_functions):
+            for j in range(0, self.n_functions):
+                self.pos_exp[i][j] = self.potential_operator_term(i,j)
+                
+        self.potential = v
+        
+    def expectation_position2(self):
+        """
+        Calculates the expectation value of the square of the position for an eigenvector in the solver basis.
+        """
+        v = self.potential
+        def pot(): return x**2
+        self.potential = pot
+        
+        #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR SQUARED (i.e. x**2)
+        self.pos_exp = np.zeros((self.n_functions,self.n_functions))
+        for i in range(0,self.n_functions):
+            for j in range(0, self.n_functions):
+                self.pos_exp[i][j] = self.potential_operator_term(i,j)
+                
+        self.potential = v
+    
+    def expectation_momentum(self):
+        """
+        Calculates the expectation value of the momentum for an eigenvector in the solver basis.
+        """
+    
+    def expectation_momentum2(self):
+        """
+        Calculates the expectation value of the momentum squared for an eigenvecor in the solver basis.
+        """
+        
+        
+def nrg_plot(psi, solver, n, m = None, energy = False):
     """
     Plots the eigenvectors and eigenvalues for a certain hamiltonian over a range of n values or at a single n value.
     
@@ -243,7 +304,7 @@ def nrg_plot(psi, solver, n, m, energy = False):
         plt.axis('tight')
         #plt.show()
 
-def run(p_function, xmin, xmax, dim, mass, n, m, energy = None, solver = 1, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 2, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -283,6 +344,8 @@ def run(p_function, xmin, xmax, dim, mass, n, m, energy = None, solver = 1, x_po
     potential.matrix_maker()
     potential.matrix_solver()
     
+    print(potential.potential_operator_term.__name__)
+    
     if x_points == True:
         print(potential.xPoints)
     
@@ -298,7 +361,39 @@ def run(p_function, xmin, xmax, dim, mass, n, m, energy = None, solver = 1, x_po
     if plot == None:
         nrg_plot(potential, solver, n, m, energy)
 
+def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 1):
+    if solver == 2:
+        omega = 1
+        #note, here dim is the number of functions
+        potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
+        potential.HO_matrix()
+    
+    potential.matrix_maker()
+    potential.matrix_solver()
+    
+    e_vectors = potential.eigenevectors
+    e_values = potential.eigenvalues
+    
+    if operator = 1:
+        
+    elif operator == 2:
+    
+    elif operator == 3:
+    
+    elif operator == 4:
+    
+    else:
+    
 
+if __name__ == "__main__":
+    electron_mass = 511
+    omega = 1
 
+    def ho_potential(x):
+        return (1/2)*electron_mass*(omega**2)*(x**2) 
+    ho = (ho_potential,"Harmonic Oscillator")
+    
+    run(ho,-0.3, 0.3, 10, electron_mass, 0, solver = 2)
+    plt.show()
 
 

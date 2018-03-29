@@ -92,6 +92,8 @@ class Discrete_Solver:
         for i in range(0, len(work_eigenvectors)):
             work_eigenvectors[i] = (1/np.sqrt(self.h)) * work_eigenvectors[i]
         self.eigenvectors = np.delete(work_eigenvectors,[0,1],0)
+        
+    
 
     def xExpecValMatrix(self):
         #Need to pad with zeros
