@@ -217,22 +217,34 @@ class Ho_Solver:
         self.potential = pot
         
         #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR SQUARED (i.e. x**2)
-        self.pos_exp = np.zeros((self.n_functions,self.n_functions))
+        self.pos2_exp = np.zeros((self.n_functions,self.n_functions))
         for i in range(0,self.n_functions):
             for j in range(0, self.n_functions):
-                self.pos_exp[i][j] = self.potential_operator_term(i,j)
+                self.pos2_exp[i][j] = self.potential_operator_term(i,j)
                 
         self.potential = v
     
     def expectation_momentum(self):
         """
-        Calculates the expectation value of the momentum for an eigenvector in the solver basis.
+        Calculates the expectastion value of the momentum for an eigenvector in the solver basis.
+        p = i*sqrt(hbar*m*omega/2)*(a_+ - a_-)
         """
+        const = np.sqrt(self.hbar * self.mass * self.omega / 2)
+        
+        
     
     def expectation_momentum2(self):
         """
         Calculates the expectation value of the momentum squared for an eigenvecor in the solver basis.
         """
+        #WRITE MOMEMTUM IN TERMS OF THIS (MAKE THIS THE CONDITIONAL STATEMENTS IN MOMENTUM HERE AND CALL THIS IN MOMENTUM)
+        self.mom2_exp = np.zeros((self.n_functions, self.n_functions))
+        
+        for i in range(0,self.n_functions):
+            for j in range(0, self.n_functions):
+                self.mom2_exp[i][j]  = self.momentum_operator_term(i,j)
+                
+            self.mom2_exp = self.mom2_exp * (2*self.mass)
         
         
 def nrg_plot(psi, solver, n, m = None, energy = False):
@@ -375,14 +387,38 @@ def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 1):
     e_values = potential.eigenvalues
     
     if operator = 1:
+        potential.expectation_position()
+        op_matrix = potential.pos_exp
+    
+        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
         
     elif operator == 2:
+        potential.expectation_position2()
+        op_matrix = potential.pos2_exp
+    
+        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
     
     elif operator == 3:
+        potential.expectation_momentum()
+        op_matrix = potential.mom_exp
+    
+        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
     
     elif operator == 4:
+        potential.expectation_momentum2()
+        op_matrix = potential.mom2_exp
+    
+        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
     
     else:
+        print("Please set operator equal to:")
+        print("1 - position expectation value")
+        print("2 - position squared expectation value")
+        print("3 - momentum expectation value")
+        print("4 - momentum squared expectation value")
+        return
+    
+    return expectation
     
 
 if __name__ == "__main__":
