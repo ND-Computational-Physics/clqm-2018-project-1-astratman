@@ -230,6 +230,15 @@ class Ho_Solver:
         p = i*sqrt(hbar*m*omega/2)*(a_+ - a_-)
         """
         const = np.sqrt(self.hbar * self.mass * self.omega / 2)
+        self.mom_exp = np.zeros((self.n_functions,self.n_functions))
+        for i in range(0, self.n_functions):
+            for j in range(0, self.n_functions):
+                if i == j+1:
+                    self.mom_exp[i][j] = sqrt(i)*const
+                elif i == j-1:
+                    self.mom_exp[i][j] = sqrt(j)*const
+                else:
+                    self.mom_exp[i][j] = 0
         
         
     
