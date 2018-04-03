@@ -77,9 +77,10 @@ class Discrete_Solver:
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
         """
         self.hamiltonian = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1, self.n_steps):
-            for j in range(1, self.n_steps):
+        for i in range (1,self.n_steps):
+            for j in range(1,self.n_steps):
                 self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
+        print(self.hamiltonian)
 
     def matrix_solver(self):
         """
@@ -87,26 +88,30 @@ class Discrete_Solver:
         """
         self.eigenvalues, self.column_eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.row_eigenvectors = np.transpose(self.column_eigenvectors)
-        
         #Normalization of the eigenvectors: 1/np.sqrt(self.h)
         for i in range(0, len(self.row_eigenvectors)):
             self.row_eigenvectors[i] = (1/np.sqrt(self.h)) * self.row_eigenvectors[i]
+        print("Row eigenvectors = ",self.row_eigenvectors)
+        self.column_eigenvectors = np.transpose(self.row_eigenvectors)
+        print("Column eigenvectors = ",self.column_eigenvectors)
         self.eigenvectors = np.delete(self.row_eigenvectors,[0,1],0)
 
     def xExpecValMatrix(self):
         #Need to pad with zeros?
+        #xPoints has dimensions n_steps+1
         self.positionMatrix = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(1,self.n_steps):
-            for j in range(1,self.n_steps):
+        for i in range(self.n_steps+1):
+            for j in range(self.n_steps+1):
                 if i == j:
                     self.positionMatrix[i][j] = 1
-        for i in range(len(self.xPoints)):
+        for i in range(self.n_steps+1):
             x_index = i
             position = self.xPoints[x_index]
             if self.operator == 1:
                 self.positionMatrix[x_index][x_index] = position * self.positionMatrix[x_index][x_index]
             elif self.operator == 2:
                 self.positionMatrix[x_index][x_index] = position**2 * self.positionMatrix[x_index][x_index]
+        print(self.positionMatrix)
 
     def calcxExpecVal(self):
         working_matrix = np.matmul(self.positionMatrix,self.column_eigenvectors)
@@ -298,8 +303,10 @@ if __name__ == "__main__":
         return 0
     square_well = (square_well_potential, "Square Well")
 
-    print(findxExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
-    print(findxExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
+    #run(square_well, -0.3, 0.3, 100, electron_mass, 0, 5, solver = 1, energy = True, hamiltonian = True)
+    #plt.show()
+    print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,1))
+    print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
     #print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
     #print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
 
