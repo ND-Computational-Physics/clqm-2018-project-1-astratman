@@ -5,6 +5,7 @@ Jan. 25th, 2018
 Computational Lab in Quantum Mechanics
 
 Solves the Schrodinger equation for time-independent potentials in a discrete or harmonic oscillator basis
+Calculates matrix elements for x, x^2, p, and p^2 operators
 """
 
 import numpy as np
@@ -80,7 +81,6 @@ class Discrete_Solver:
         for i in range (1,self.n_steps):
             for j in range(1,self.n_steps):
                 self.hamiltonian[i][j] = self.matrix_element_finder(i,j)
-        print(self.hamiltonian)
 
     def matrix_solver(self):
         """
@@ -91,17 +91,16 @@ class Discrete_Solver:
         #Normalization of the eigenvectors: 1/np.sqrt(self.h)
         for i in range(0, len(self.row_eigenvectors)):
             self.row_eigenvectors[i] = (1/np.sqrt(self.h)) * self.row_eigenvectors[i]
-        print("Row eigenvectors = ",self.row_eigenvectors)
-        self.column_eigenvectors = np.transpose(self.row_eigenvectors)
-        print("Column eigenvectors = ",self.column_eigenvectors)
         self.eigenvectors = np.delete(self.row_eigenvectors,[0,1],0)
+        self.row_eigenvectors = np.delete(self.row_eigenvectors,[0,1],0)
+        self.column_eigenvectors = np.transpose(self.row_eigenvectors)
 
     def xExpecValMatrix(self):
-        #Need to pad with zeros?
+        #Padded with zeros
         #xPoints has dimensions n_steps+1
         self.positionMatrix = np.zeros((self.n_steps+1,self.n_steps+1))
-        for i in range(self.n_steps+1):
-            for j in range(self.n_steps+1):
+        for i in range(1,self.n_steps):
+            for j in range(1,self.n_steps):
                 if i == j:
                     self.positionMatrix[i][j] = 1
         for i in range(self.n_steps+1):
@@ -111,12 +110,10 @@ class Discrete_Solver:
                 self.positionMatrix[x_index][x_index] = position * self.positionMatrix[x_index][x_index]
             elif self.operator == 2:
                 self.positionMatrix[x_index][x_index] = position**2 * self.positionMatrix[x_index][x_index]
-        print(self.positionMatrix)
 
     def calcxExpecVal(self):
         working_matrix = np.matmul(self.positionMatrix,self.column_eigenvectors)
         self.xExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
-        #return xExpecVal
 
     def momentumElementFinder(self,i,j):
         if i == j:
@@ -128,15 +125,15 @@ class Discrete_Solver:
         return Element
 
     def pExpecValMatrix(self):
-        #Need to pad with zeros?
+        #Padded with zeros
         self.momentumMatrix = np.zeros((self.n_steps+1,self.n_steps+1),dtype=np.complex)
         if self.operator == 1:
             for i in range(1,self.n_steps):
                 for j in range(1,self.n_steps):
                     self.momentumMatrix[i][j] = self.momentumElementFinder(i,j)
         elif self.operator == 2:
-            for i in range(self.n_steps+1):
-                for j in range(self.n_steps+1):
+            for i in range(1,self.n_steps):
+                for j in range(1,self.n_steps):
                     if i == j:
                         self.momentumMatrix[i][j] = 1
             for i in range(len(self.xPoints)):
@@ -145,15 +142,10 @@ class Discrete_Solver:
                 #Check this - find KE terms by subtracting potential from diagonal elements of Hamiltonian
                 #then find momentum terms by multiplying by 2m (KE = p^2/2m)
                 self.momentumMatrix[x_index][x_index] = 2*self.mass*(self.hamiltonian[x_index][x_index] - self.potential(position))
-        #print("Momentum matrix =",self.momentumMatrix)
 
     def calcpExpecVal(self):
         working_matrix = np.matmul(self.momentumMatrix,self.column_eigenvectors)
-        #print("Working matrix =",working_matrix)
-        self.pExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
-        #print("Momentum expectation value = ",pExpecVal)
-        #return self.pExpecVal
-    
+        self.pExpecVal = np.matmul(self.row_eigenvectors,working_matrix)  
 
 def nrg_plot(psi, solver, n, m, energy = False):
     """
@@ -297,6 +289,9 @@ def findpExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
 
 if __name__ == "__main__":
 
+    #Numbers equal to zero in the current precision print as zero
+    np.set_printoptions(suppress=True)
+
     electron_mass = 511
 
     def square_well_potential(x):
@@ -306,9 +301,9 @@ if __name__ == "__main__":
     #run(square_well, -0.3, 0.3, 100, electron_mass, 0, 5, solver = 1, energy = True, hamiltonian = True)
     #plt.show()
     print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,1))
-    print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
-    #print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,1))
-    #print(findpExpectationValue(square_well,-0.1,0.1,100,electron_mass,0,5,2))
+    #print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
+    print(findpExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,1))
+    #print(findpExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
 
     #run(square_well,-0.1,0.1,100,electron_mass,0,5)
     #plt.show()
