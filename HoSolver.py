@@ -124,25 +124,8 @@ class Ho_Solver:
 
         Hermite2 = hermite.hermite(j,curvy_e)
         psi2 = (self.mass*self.omega/(np.pi*self.h_bar))**(1/4) * 1/(np.sqrt((2**j)*scipy.misc.factorial(j))) * Hermite2 * np.exp(-(curvy_e**2)/2)
-
-        """
-        print(__name__)
-        if __name__ == "matrix_maker":
-            print("pot")
-            v = self.potential(x)
-        elif __name__ == "expectation_position":
-            def pot(): return x
-            v = pot(x)
-        elif __name__ == "expectation_position2":
-            def pot(): return x**2
-            v = pot(x)
-        else:
-            print("It's something else.")
-            v = self.potential(x)
-        """
-        v = self.potential(x)
         
-        return psi1 * v * psi2
+        return psi1 * self.potential(x) * psi2
     
     def potential_operator_term(self, i, j):
         """
@@ -190,14 +173,12 @@ class Ho_Solver:
         self.eigenvectors = np.transpose(self.eigenvectors)
     
     
-    
-    
     def expectation_position(self):
         """
         Calculates the expetation value of the position for an eigenvector in the solver basis.
         """
         v = self.potential
-        def pot(): return x
+        def pot(x): return x
         self.potential = pot
         
         #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR (i.e. x)
@@ -213,7 +194,7 @@ class Ho_Solver:
         Calculates the expectation value of the square of the position for an eigenvector in the solver basis.
         """
         v = self.potential
-        def pot(): return x**2
+        def pot(x): return x**2
         self.potential = pot
         
         #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR SQUARED (i.e. x**2)
@@ -229,24 +210,23 @@ class Ho_Solver:
         Calculates the expectastion value of the momentum for an eigenvector in the solver basis.
         p = i*sqrt(hbar*m*omega/2)*(a_+ - a_-)
         """
-        const = np.sqrt(self.hbar * self.mass * self.omega / 2)
+        const = np.sqrt(self.h_bar * self.mass * self.omega / 2)
         self.mom_exp = np.zeros((self.n_functions,self.n_functions))
         for i in range(0, self.n_functions):
             for j in range(0, self.n_functions):
                 if i == j+1:
-                    self.mom_exp[i][j] = sqrt(i)*const
+                    self.mom_exp[i][j] = np.sqrt(i)*const
                 elif i == j-1:
-                    self.mom_exp[i][j] = sqrt(j)*const
+                    self.mom_exp[i][j] = np.sqrt(j)*const
                 else:
                     self.mom_exp[i][j] = 0
-        
         
     
     def expectation_momentum2(self):
         """
         Calculates the expectation value of the momentum squared for an eigenvecor in the solver basis.
         """
-        #WRITE MOMEMTUM IN TERMS OF THIS (MAKE THIS THE CONDITIONAL STATEMENTS IN MOMENTUM HERE AND CALL THIS IN MOMENTUM)
+        #WRITE MOMENTUM IN TERMS OF THIS (MAKE THIS THE CONDITIONAL STATEMENTS IN MOMENTUM HERE AND CALL THIS IN MOMENTUM)
         self.mom2_exp = np.zeros((self.n_functions, self.n_functions))
         
         for i in range(0,self.n_functions):
@@ -325,12 +305,47 @@ def nrg_plot(psi, solver, n, m = None, energy = False):
         plt.axis('tight')
         #plt.show()
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 2, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot = None):
+def exp_plot(solver_obj, exp_type):
+    """Plots the expectation value of a particle within a potential against the 
+    """
+    if exp_type == 1:
+        name = "x"
+    
+    elif exp_type == 2:
+        name = "x^2"
+    
+    elif exp_type == 3:
+        name = "p"
+    
+    elif exp_type == 4:
+        name = "p^2"
+    
+    else:
+        print("Please set \'operator\' equal to:")
+        print("1 - position expectation value")
+        print("2 - position squared expectation value")
+        print("3 - momentum expectation value")
+        print("4 - momentum squared expectation value")
+    
+    expectation_values = []
+    for n in range(solver_obj.n_functions):
+        expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,solver_obj.n_functions,solver_obj.mass,n,operator = exp_type))
+
+    plt.plot(range(solver_obj.n_functions), expectation_values)
+    plt.title("Expectation value of " + name + "vs. number of functions")
+    plt.ylabel('Expectation value of ' + name)
+    plt.xlabel('Number of Functions')
+    plt.axis('tight')
+    #plt.show()
+    
+    
+
+def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 2, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot_psi = None, plot_exp = (None, 1)):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
     Arguments:
-    p_function (function) - a potential function
+    p_function (tuple) - (a potential function
     xmin (float) - left bound of positions
     xmax (float) - right bound of positions
     dim (int) - number of increments when evaluating the wavefunctions
@@ -365,7 +380,7 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
     potential.matrix_maker()
     potential.matrix_solver()
     
-    print(potential.potential_operator_term.__name__)
+    #print(potential.potential_operator_term.__name__)
     
     if x_points == True:
         print(potential.xPoints)
@@ -379,10 +394,23 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
     if hamiltonian == True:
         print(potential.hamiltonian)
 
-    if plot == None:
+    if plot_psi == True:
         nrg_plot(potential, solver, n, m, energy)
-
-def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 1):
+        
+    if plot_exp[0] == True:
+        exp_plot(potential,plot_exp[1])
+        
+def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 0, transition = None):
+    """Calculates expectation values for different physical values for a particle within a certain potential function
+    
+    Arguments:
+        operator (int) - defines which expectation value to calculate:
+                        (1) - position
+                        (2) - position^2
+                        (3) - momentum
+                        (4) - momentum^2
+        transition (int) - calculates the 'transition probabilities'
+    """
     if solver == 2:
         omega = 1
         #note, here dim is the number of functions
@@ -392,39 +420,43 @@ def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 1):
     potential.matrix_maker()
     potential.matrix_solver()
     
-    e_vectors = potential.eigenevectors
+    e_vectors = potential.eigenvectors
     e_values = potential.eigenvalues
     
-    if operator = 1:
+    if transition == True:
+        m = n+1
+    else: 
+        m = n
+    
+    if operator == 1:
         potential.expectation_position()
         op_matrix = potential.pos_exp
-    
-        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
+        
+        #print(op_matrix)
+        expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
         
     elif operator == 2:
         potential.expectation_position2()
         op_matrix = potential.pos2_exp
     
-        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
+        #print(op_matrix)
+        expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
     
     elif operator == 3:
         potential.expectation_momentum()
         op_matrix = potential.mom_exp
     
-        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
+        #print(op_matrix)
+        expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
     
     elif operator == 4:
         potential.expectation_momentum2()
         op_matrix = potential.mom2_exp
     
-        expectation = np.dot(np.transpose(potential.eigenvalues),np.dot(op_matrix,potential.eigenvalues))
+        #print(op_matrix)
+        expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
     
     else:
-        print("Please set operator equal to:")
-        print("1 - position expectation value")
-        print("2 - position squared expectation value")
-        print("3 - momentum expectation value")
-        print("4 - momentum squared expectation value")
         return
     
     return expectation
@@ -438,7 +470,13 @@ if __name__ == "__main__":
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
     
-    run(ho,-0.3, 0.3, 10, electron_mass, 0, solver = 2)
+    #np.set_printoptions(suppress=True)
+    
+    #print(expectation(ho,-0.3,0.3,10,electron_mass,0,operator = 4))
+    
+    run(ho,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,4))
     plt.show()
+    
+    
 
 
