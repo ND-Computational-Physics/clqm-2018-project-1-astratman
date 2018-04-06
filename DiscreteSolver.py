@@ -115,11 +115,22 @@ class Discrete_Solver:
         working_matrix = np.matmul(self.positionMatrix,self.column_eigenvectors)
         self.xExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
 
-    def momentumElementFinder(self,i,j):
+    def momentumElementFinder1(self,i,j):
         if i == j:
             Element = 1j/self.h
         elif i + 1 == j:
             Element = -1j/self.h
+        else:
+            Element = 0
+        return Element
+
+    def momentumElementFinder2(self,i,j):
+        if i == j:
+            Element = 2/(self.h**2)
+        elif i == j + 1:
+            Element = -1/(self.h**2)
+        elif j == i + 1:
+            Element = -1/(self.h**2)
         else:
             Element = 0
         return Element
@@ -130,18 +141,18 @@ class Discrete_Solver:
         if self.operator == 1:
             for i in range(1,self.n_steps):
                 for j in range(1,self.n_steps):
-                    self.momentumMatrix[i][j] = self.momentumElementFinder(i,j)
+                    self.momentumMatrix[i][j] = self.momentumElementFinder1(i,j)
         elif self.operator == 2:
             for i in range(1,self.n_steps):
                 for j in range(1,self.n_steps):
                     if i == j:
-                        self.momentumMatrix[i][j] = 1
-            for i in range(len(self.xPoints)):
-                x_index = i
-                position = self.xPoints[x_index]
+                        self.momentumMatrix[i][j] = self.momentumElementFinder2(i,j)
+            #for i in range(len(self.xPoints)):
+                #x_index = i
+                #position = self.xPoints[x_index]
                 #Check this - find KE terms by subtracting potential from diagonal elements of Hamiltonian
                 #then find momentum terms by multiplying by 2m (KE = p^2/2m)
-                self.momentumMatrix[x_index][x_index] = 2*self.mass*(self.hamiltonian[x_index][x_index] - self.potential(position))
+                #self.momentumMatrix[x_index][x_index] = 2*self.mass*(self.hamiltonian[x_index][x_index] - self.potential(position))
 
     def calcpExpecVal(self):
         working_matrix = np.matmul(self.momentumMatrix,self.column_eigenvectors)
@@ -303,7 +314,7 @@ if __name__ == "__main__":
     print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,1))
     #print(findxExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
     print(findpExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,1))
-    #print(findpExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
+    print(findpExpectationValue(square_well,-0.1,0.1,5,electron_mass,0,5,2))
 
     #run(square_well,-0.1,0.1,100,electron_mass,0,5)
     #plt.show()
