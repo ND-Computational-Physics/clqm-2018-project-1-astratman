@@ -54,7 +54,11 @@ class Ho_Solver:
         self.xPoints = np.zeros(self.n_steps)
         for i in range(self.n_steps):
             self.xPoints[i] = i*self.h + self.xmin
-    
+
+    def set_omega(self,omega):
+        self.omega = omega
+        
+    #IMPORTANT WAVEFUNCTION AND MATRIX
     def HO_wavefunction(self,x,n):
         """
         Defines the harmonic oscillator wavefunction
@@ -86,6 +90,7 @@ class Ho_Solver:
             for j in range(0,self.n_functions):
                 self.transform[i][j] = self.HO_wavefunction(x,j)
 
+    #CALCULATE HAMILTONIAN TERMS
     def momentum_operator_term(self,i,j):
         """
         Finds the term in each matrix element associated with the momentum operator
@@ -155,7 +160,8 @@ class Ho_Solver:
         """
         Element =  self.momentum_operator_term(i,j) + self.potential_operator_term(i,j)
         return Element 
-        
+    
+    #ASSEMBLE THE HAMILTONIAN MATRIX
     def matrix_maker(self):
         """
         Creates a matrix and stores the values of the matrix found by Solver.matrix_element_finder as the elements of the matrix.
@@ -172,7 +178,7 @@ class Ho_Solver:
         self.eigenvalues, self.eigenvectors = np.linalg.eigh(self.hamiltonian)
         self.eigenvectors = np.transpose(self.eigenvectors)
     
-    
+    #EXPECTATION VALUES
     def expectation_position(self):
         """
         Calculates the expetation value of the position for an eigenvector in the solver basis.
@@ -180,8 +186,7 @@ class Ho_Solver:
         v = self.potential
         def pot(x): return x
         self.potential = pot
-        
-        #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR (i.e. x)
+
         self.pos_exp = np.zeros((self.n_functions,self.n_functions))
         for i in range(0,self.n_functions):
             for j in range(0, self.n_functions):
@@ -196,8 +201,7 @@ class Ho_Solver:
         v = self.potential
         def pot(x): return x**2
         self.potential = pot
-        
-        #NOTE THIS ONLY WORKS FOR A POTENTIAL WHICH IS THE POSITION OPERATOR SQUARED (i.e. x**2)
+
         self.pos2_exp = np.zeros((self.n_functions,self.n_functions))
         for i in range(0,self.n_functions):
             for j in range(0, self.n_functions):
@@ -220,7 +224,6 @@ class Ho_Solver:
                     self.mom_exp[i][j] = np.sqrt(j)*const
                 else:
                     self.mom_exp[i][j] = 0
-        
     
     def expectation_momentum2(self):
         """
@@ -231,7 +234,7 @@ class Ho_Solver:
         
         for i in range(0,self.n_functions):
             for j in range(0, self.n_functions):
-                self.mom2_exp[i][j]  = self.momentum_operator_term(i,j)
+                self.mom2_exp[i][j]  = -self.momentum_operator_term(i,j)
                 
             self.mom2_exp = self.mom2_exp * (2*self.mass)
         
@@ -303,23 +306,22 @@ def nrg_plot(psi, solver, n, m = None, energy = False):
         plt.ylabel('Wavefunction')
         plt.xlabel('Position')
         plt.axis('tight')
-        #plt.show()
 
-def exp_plot(solver_obj, exp_type):
+def exp_plot(solver_obj,exp_type, tran_type, plot_type):
     """Plots the expectation value of a particle within a potential against the 
     """
     if exp_type == 1:
         name = "x"
-    
+        
     elif exp_type == 2:
         name = "x^2"
-    
+        
     elif exp_type == 3:
         name = "p"
-    
+        
     elif exp_type == 4:
         name = "p^2"
-    
+        
     else:
         print("Please set \'operator\' equal to:")
         print("1 - position expectation value")
@@ -328,19 +330,107 @@ def exp_plot(solver_obj, exp_type):
         print("4 - momentum squared expectation value")
     
     expectation_values = []
-    for n in range(solver_obj.n_functions):
-        expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,solver_obj.n_functions,solver_obj.mass,n,operator = exp_type))
+    #Plotting vs number of basis functions
+    if plot_type == 1:
+        if tran_type == True:
+            title = "Transition probability of " + name + " vs. number of functions"
+            y_label = "Transition probability of " + name
+            
+            if exp_type == 2 or exp_type == 4:
+                n_range = range(2,solver_obj.n_functions-1)
+                for n in n_range:
+                    expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))
+                    #print("Number of functions: " + str(n))
+                    print(expectation_values[n-2])
+                    #print()
+                    
+            elif exp_type == 1 or exp_type == 3:
+                n_range = range(1,solver_obj.n_functions-1)
+                for n in n_range:
+                    expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))
+                    #print("Number of functions: " + str(n))
+                    print(expectation_values[n-1])
+                    #print()
+                
+        else:
+            n_range = range(1,solver_obj.n_functions)
+            title = "Expectation value of " + name + " vs. number of functions"
+            y_label = "Expectation value of " + name
+            for n in n_range:
+                expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))
+                print("Number of functions: " + str(n))
+                print(expectation_values[n-1])
+                #print()
+            
+        plt.plot(n_range, expectation_values, label = 'hbar*omega = ' + str(solver_obj.omega))
+        plt.title(title)
+        plt.ylabel(y_label)
+        plt.xlabel("Number of Functions")
+    
+    #Plotting vs hbar*omega
+    elif plot_type == 2:
+        if tran_type == True:
+            title = "Transition probability of " + name + " vs. hbar*omega"
+            y_label = "Transition probability of " + name
+        else:
+            title = "Expectation value of " + name + " vs. hbar*omega"
+            y_label = "Expectation value of " + name
+            
+        #arbitrary list of omegas
+        omega_list = [0.25,0.5,1,5,10]
+        for n in range(len(omega_list)):
+            expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,solver_obj.n_functions,solver_obj.mass,0,omega_list[n],operator = exp_type, transition = tran_type))
+            print("hbar*omega: " + str(omega_list[n]))
+            print(expectation_values[n])
+            
+        plt.plot(omega_list, expectation_values)
+        plt.title(title)
+        plt.ylabel(y_label)
+        plt.xlabel("hbar*omega")
+        
+    #Plotting sqrt(Expectation values) vs. number of basis functions
+    elif plot_type == 3:
+        if tran_type == True:
+            n_range = range(2,solver_obj.n_functions-1)
+            title = "Transition probability of " + name + " vs. number of functions"
+            y_label = "Transition probability of " + name
+            for n in n_range:
+                expectation_values.append(np.sqrt(np.abs(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))))
+                #print("Number of functions: " + str(n))
+                print(expectation_values[n-2])
+                #print()
+        else:
+            n_range = range(1,solver_obj.n_functions)
+            title = "Expectation value of " + name + " vs. number of functions"
+            y_label = "Expectation value of " + name
+            for n in n_range:
+                expectation_values.append(np.sqrt(np.abs(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))))
+                print("Number of functions: " + str(n))
+                print(expectation_values[n-1])
+                #print()
+            
+        plt.plot(n_range, expectation_values, label = 'hbar*omega = ' + str(solver_obj.omega))
+        plt.title(title)
+        plt.ylabel(y_label)
+        plt.xlabel("Number of Functions")
+        
+    #ax = plt.gca()
+    #ax.set_ylimit([-1,1])
 
-    plt.plot(range(solver_obj.n_functions), expectation_values)
-    plt.title("Expectation value of " + name + "vs. number of functions")
-    plt.ylabel('Expectation value of ' + name)
-    plt.xlabel('Number of Functions')
-    plt.axis('tight')
+    plt.axis("tight")
     #plt.show()
-    
-    
+            
+def multi_plot(solver_obj, exp_type, tran_type, plot_type, multi_type = 1):
+    if multi_type == 1:
+        omega_list = [0.25,0.5,1,5,10]
+        for n in range(len(omega_list)):
+            solver_obj.set_omega(omega_list[n])
+            exp_plot(solver_obj,exp_type,tran_type,plot_type)
+        #FIGURE OUT HOW TO ADD A LEGEND BELOW
+        ax = plt.gca()
+        ax.legend(loc = 'best')
 
-def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 2, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot_psi = None, plot_exp = (None, 1)):
+def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 2, x_points = None, e_values = None, e_vectors = None, hamiltonian = None, plot_psi = None, plot_exp = (None, 1, None, 1), plot_multi = None):
     """
     Creates a solver object for a potential function and plots the potential function's wavefunction.
     
@@ -380,8 +470,6 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
     potential.matrix_maker()
     potential.matrix_solver()
     
-    #print(potential.potential_operator_term.__name__)
-    
     if x_points == True:
         print(potential.xPoints)
     
@@ -397,10 +485,14 @@ def run(p_function, xmin, xmax, dim, mass, n, m = None, energy = None, solver = 
     if plot_psi == True:
         nrg_plot(potential, solver, n, m, energy)
         
-    if plot_exp[0] == True:
-        exp_plot(potential,plot_exp[1])
+    if plot_multi == None and plot_exp[0] == True:
+        exp_plot(potential,plot_exp[1], plot_exp[2], plot_exp[3])
         
-def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 0, transition = None):
+    if plot_multi != None and plot_exp[0] == True:
+        multi_plot(potential,plot_exp[1], plot_exp[2], plot_exp[3], multi_type = plot_multi)
+        
+        
+def expectation(p_function, xmin, xmax, dim, mass, n, omega, solver = 2, operator = 0, transition = None):
     """Calculates expectation values for different physical values for a particle within a certain potential function
     
     Arguments:
@@ -409,10 +501,9 @@ def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 0, 
                         (2) - position^2
                         (3) - momentum
                         (4) - momentum^2
-        transition (int) - calculates the 'transition probabilities'
+        transition (int) - calculates the 'transition amplitudes'
     """
     if solver == 2:
-        omega = 1
         #note, here dim is the number of functions
         potential = Ho_Solver(p_function, xmin, xmax, dim, mass, omega)
         potential.HO_matrix()
@@ -423,36 +514,34 @@ def expectation(p_function, xmin, xmax, dim, mass, n, solver = 2, operator = 0, 
     e_vectors = potential.eigenvectors
     e_values = potential.eigenvalues
     
-    if transition == True:
-        m = n+1
+    if transition == True and (operator == 1 or operator == 3):
+        m = n-1
+    elif transition == True and (operator == 2 or operator == 4):
+        m = n-2
     else: 
         m = n
     
     if operator == 1:
         potential.expectation_position()
         op_matrix = potential.pos_exp
-        
         #print(op_matrix)
         expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
         
     elif operator == 2:
         potential.expectation_position2()
         op_matrix = potential.pos2_exp
-    
         #print(op_matrix)
         expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
     
     elif operator == 3:
         potential.expectation_momentum()
         op_matrix = potential.mom_exp
-    
         #print(op_matrix)
         expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
     
     elif operator == 4:
         potential.expectation_momentum2()
         op_matrix = potential.mom2_exp
-    
         #print(op_matrix)
         expectation = np.dot(np.transpose(e_vectors[n]),np.dot(op_matrix,e_vectors[m]))
     
@@ -470,11 +559,84 @@ if __name__ == "__main__":
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
     
+    def ho_bump_potential(x):
+        return x**4 - x**2
+    bump = (ho_bump_potential,"Perturbed Harmonic Oscillator")
+    
     #np.set_printoptions(suppress=True)
+    #print(expectation(ho,-0.3,0.3,10,electron_mass,0,operator = 4, transition = True))
     
-    #print(expectation(ho,-0.3,0.3,10,electron_mass,0,operator = 4))
+    def plotty_mcplotface(potential, plot_type):
+        """
+        (1) - x expectation
+        (2) - x^2 expectation
+        (3) - p expectation
+        (4) - p^2 expectation
+        (5) - x transition
+        (6) - x^2 transition
+        (7) - p transition
+        (8) - p^2 transition
+        (9) - square root of x^2 expectation
+        (10) - square root of p^2 expectation
+        """
+        #EXPECTATIONS
+        if plot_type == 1:
+            #Plots the expectation value of x against the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,1, False, 1),plot_multi = True)
     
-    run(ho,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,4))
+        if plot_type == 2:
+            #Plots the expectation value of x^2 against the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,2, False, 1),plot_multi = True)
+    
+        if plot_type == 3:
+            #Plots the expectation value of p against the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,3, False, 1),plot_multi = True)
+    
+        if plot_type == 4:
+            #Plots the expectation value of p^2 against the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,4, False, 1),plot_multi = True)
+    
+    
+        #TRANSITIONS
+        if plot_type == 5:
+            #Plots the transition probability of x agains the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 11, electron_mass, 0, solver = 2, plot_exp = (True,1, True, 1),plot_multi = True)
+    
+        if plot_type == 6:
+            #Plots the transition probability of x^2 agains the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 12, electron_mass, 0, solver = 2, plot_exp = (True,2, True, 1),plot_multi = True)
+    
+        if plot_type == 7:
+            #Plots the transition probability of p agains the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 11, electron_mass, 0, solver = 2, plot_exp = (True,3, True, 1),plot_multi = True)
+    
+        if plot_type == 8:
+            #Plots the transition probability of p^2 agains the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 12, electron_mass, 0, solver = 2, plot_exp = (True,4, True, 1),plot_multi = True)
+            
+            
+        #ROOTS OF EXPECTATIONS
+        if plot_type == 9:
+            #Plots the expectation value of x^2 against the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,2, False, 3),plot_multi = True)
+            
+        if plot_type == 10:
+            #Plots the expectation value of p^2 against the number of basis functions for multiple values of hbar*omega
+            run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,4, False, 3),plot_multi = True)
+    
+    #Plots for the Harmonic Oscillator Potential:
+    #plotty_mcplotface(ho,5)
+    #plotty_mcplotface(ho,6)
+    #plotty_mcplotface(ho,9)
+    plotty_mcplotface(ho,10)
+    
+    #Plots for the Perturbed Harmonic Oscillator Potential:
+    #plotty_mcplotface(bump,5)
+    #plotty_mcplotface(bump,6)
+    #plotty_mcplotface(bump,9)
+    #plotty_mcplotface(bump,10)
+    
+    plt.legend(loc = 'best')
     plt.show()
     
     
