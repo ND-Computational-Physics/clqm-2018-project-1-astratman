@@ -234,9 +234,9 @@ class Ho_Solver:
         
         for i in range(0,self.n_functions):
             for j in range(0, self.n_functions):
-                self.mom2_exp[i][j]  = -self.momentum_operator_term(i,j)
+                self.mom2_exp[i][j]  = np.abs(self.momentum_operator_term(i,j))
                 
-            self.mom2_exp = self.mom2_exp * (2*self.mass)
+        self.mom2_exp = self.mom2_exp * (2*self.mass)
         
         
 def nrg_plot(psi, solver, n, m = None, energy = False):
@@ -332,10 +332,12 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
     expectation_values = []
     #Plotting vs number of basis functions
     if plot_type == 1:
+        #plotting transition amplitudes
         if tran_type == True:
             title = "Transition probability of " + name + " vs. number of functions"
             y_label = "Transition probability of " + name
             
+            #need to transition by 2 to be non-zero
             if exp_type == 2 or exp_type == 4:
                 n_range = range(2,solver_obj.n_functions-1)
                 for n in n_range:
@@ -343,7 +345,8 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
                     #print("Number of functions: " + str(n))
                     print(expectation_values[n-2])
                     #print()
-                    
+               
+            #need to transition by 1 to be non-zero
             elif exp_type == 1 or exp_type == 3:
                 n_range = range(1,solver_obj.n_functions-1)
                 for n in n_range:
@@ -351,14 +354,15 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
                     #print("Number of functions: " + str(n))
                     print(expectation_values[n-1])
                     #print()
-                
+        
+        #plotting expectation values
         else:
             n_range = range(1,solver_obj.n_functions)
             title = "Expectation value of " + name + " vs. number of functions"
             y_label = "Expectation value of " + name
             for n in n_range:
                 expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))
-                print("Number of functions: " + str(n))
+                #print("Number of functions: " + str(n))
                 print(expectation_values[n-1])
                 #print()
             
@@ -369,9 +373,12 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
     
     #Plotting vs hbar*omega
     elif plot_type == 2:
+        #plotting transition amplitudes
         if tran_type == True:
             title = "Transition probability of " + name + " vs. hbar*omega"
             y_label = "Transition probability of " + name
+            
+        #plotting expectation values
         else:
             title = "Expectation value of " + name + " vs. hbar*omega"
             y_label = "Expectation value of " + name
@@ -380,7 +387,7 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
         omega_list = [0.25,0.5,1,5,10]
         for n in range(len(omega_list)):
             expectation_values.append(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,solver_obj.n_functions,solver_obj.mass,0,omega_list[n],operator = exp_type, transition = tran_type))
-            print("hbar*omega: " + str(omega_list[n]))
+            #print("hbar*omega: " + str(omega_list[n]))
             print(expectation_values[n])
             
         plt.plot(omega_list, expectation_values)
@@ -390,6 +397,7 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
         
     #Plotting sqrt(Expectation values) vs. number of basis functions
     elif plot_type == 3:
+        #plotting transition amplitudes
         if tran_type == True:
             n_range = range(2,solver_obj.n_functions-1)
             title = "Transition probability of " + name + " vs. number of functions"
@@ -399,13 +407,15 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
                 #print("Number of functions: " + str(n))
                 print(expectation_values[n-2])
                 #print()
+                
+        #plotting expectation values
         else:
             n_range = range(1,solver_obj.n_functions)
             title = "Expectation value of " + name + " vs. number of functions"
             y_label = "Expectation value of " + name
             for n in n_range:
                 expectation_values.append(np.sqrt(np.abs(expectation((solver_obj.potential,solver_obj.potential_name),solver_obj.xmin,solver_obj.xmax,n,solver_obj.mass,0,solver_obj.omega,operator = exp_type, transition = tran_type))))
-                print("Number of functions: " + str(n))
+                #print("Number of functions: " + str(n))
                 print(expectation_values[n-1])
                 #print()
             
@@ -413,12 +423,8 @@ def exp_plot(solver_obj,exp_type, tran_type, plot_type):
         plt.title(title)
         plt.ylabel(y_label)
         plt.xlabel("Number of Functions")
-        
-    #ax = plt.gca()
-    #ax.set_ylimit([-1,1])
 
     plt.axis("tight")
-    #plt.show()
             
 def multi_plot(solver_obj, exp_type, tran_type, plot_type, multi_type = 1):
     if multi_type == 1:
@@ -563,9 +569,6 @@ if __name__ == "__main__":
         return x**4 - x**2
     bump = (ho_bump_potential,"Perturbed Harmonic Oscillator")
     
-    #np.set_printoptions(suppress=True)
-    #print(expectation(ho,-0.3,0.3,10,electron_mass,0,operator = 4, transition = True))
-    
     def plotty_mcplotface(potential, plot_type):
         """
         (1) - x expectation
@@ -625,8 +628,11 @@ if __name__ == "__main__":
             run(potential,-0.3, 0.3, 10, electron_mass, 0, solver = 2, plot_exp = (True,4, False, 3),plot_multi = True)
     
     #Plots for the Harmonic Oscillator Potential:
+    #These two converge, but do encounter negative values? ->
     #plotty_mcplotface(ho,5)
     #plotty_mcplotface(ho,6)
+    
+    #These two diverge->
     #plotty_mcplotface(ho,9)
     plotty_mcplotface(ho,10)
     
