@@ -635,7 +635,7 @@ if __name__ == "__main__":
     
     #These two diverge->
     #plotty_mcplotface(ho,9)
-    plotty_mcplotface(ho,10)
+    plotty_mcplotface(ho,9)
     
     #Plots for the Perturbed Harmonic Oscillator Potential:
     #plotty_mcplotface(bump,5)
