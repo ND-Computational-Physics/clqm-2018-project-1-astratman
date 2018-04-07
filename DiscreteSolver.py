@@ -113,8 +113,8 @@ class Discrete_Solver:
                 self.positionMatrix[x_index][x_index] = self.h * position**2 * self.positionMatrix[x_index][x_index]
 
     def calcxExpecVal(self):
-        working_matrix = np.matmul(self.positionMatrix,self.column_eigenvectors)
-        self.xExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
+        working_matrix = np.dot(self.positionMatrix,self.column_eigenvectors)
+        self.xExpecVal = np.dot(self.row_eigenvectors,working_matrix)
 
     def momentumElementFinder1(self,i,j):
         if i == j:
