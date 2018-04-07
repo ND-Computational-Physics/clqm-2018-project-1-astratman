@@ -110,7 +110,7 @@ class Discrete_Solver:
             if self.operator == 1:
                 self.positionMatrix[x_index][x_index] = self.h * position * self.positionMatrix[x_index][x_index]
             elif self.operator == 2:
-                self.positionMatrix[x_index][x_index] = self.h**2 * position**2 * self.positionMatrix[x_index][x_index]
+                self.positionMatrix[x_index][x_index] = self.h * position**2 * self.positionMatrix[x_index][x_index]
 
     def calcxExpecVal(self):
         working_matrix = np.matmul(self.positionMatrix,self.column_eigenvectors)
@@ -303,29 +303,35 @@ def xPlotter(potential,operator,rms=False):
     electron_mass = 511
     xValues = []
     nValues = []
-    for n in range(100,501,10):
+    for n in range(100,1001,10):
         nValues.append(n)
-        xVal = findxExpectationValue(potential,-0.3,0.3,n,electron_mass,0,10,operator)
+        xVal = findxExpectationValue(potential,-1,1,n,electron_mass,0,10,operator)
         if rms == False:
             xValues.append(xVal[0][0])
         elif rms == True:
             xValues.append(np.sqrt(xVal[0][0]))
     plt.plot(nValues,xValues)
     plt.xlabel("Number of Dimensions")
-    plt.ylabel("Expectation Value")
+    if rms == False:
+        plt.ylabel("Expectation Value")
+    elif rms == True:
+        plt.ylabel("RMS Value")
     if operator == 1:
-        plt.title("Expectation Value of Position for Ground State")
+        plt.title("Expectation Value of Position for Ground State",y=1.05)
     elif operator == 2:
-        plt.title("Expectation Value of Position Squared for Ground State")
+        if rms == False:
+            plt.title("Expectation Value of Position Squared for Ground State",y=1.05)
+        else:
+            plt.title("RMS Position for Ground State",y=1.05)
     plt.show()
 
 def pPlotter(potential,operator,rms=False):
     electron_mass = 511
     pValues = []
     nValues = []
-    for n in range(100,501,10):
+    for n in range(100,1001,20):
         nValues.append(n)
-        pVal = findpExpectationValue(potential,-0.3,0.3,n,electron_mass,0,10,operator)
+        pVal = findpExpectationValue(potential,-1,1,n,electron_mass,0,10,operator)
         if operator == 1:
             momentum = np.imag(pVal[0][0])
         elif operator == 2:
@@ -333,14 +339,20 @@ def pPlotter(potential,operator,rms=False):
         if rms == False:
             pValues.append(momentum)
         elif rms == True:
-            pValues.append(momentum)
+            pValues.append(np.sqrt(momentum))
     plt.plot(nValues,pValues)
     plt.xlabel("Number of Dimensions")
-    plt.ylabel("Expectation Value")
+    if rms == False:
+        plt.ylabel("Expectation Value")
+    elif rms == True:
+        plt.ylabel("RMS Value")
     if operator == 1:
-        plt.title("Expectation Value of Momentum for Ground State")
+        plt.title("Expectation Value of Momentum for Ground State",y=1.05)
     elif operator == 2:
-        plt.title("Expectation Value of Momentum Squared for Ground State")
+        if rms == False:
+            plt.title("Expectation Value of Momentum Squared for Ground State",y=1.05)
+        else:
+            plt.title("RMS Momentum for Ground State",y=1.05)
     plt.show()
 
 if __name__ == "__main__":
@@ -359,29 +371,40 @@ if __name__ == "__main__":
         return (1/2)*electron_mass*(omega**2)*(x**2) 
     ho = (ho_potential,"Harmonic Oscillator")
 
+    def trig_potential(x):
+        return (np.sin(x))**2
+    trig = (trig_potential,"Sine Squared")
+
     #run(square_well, -0.3, 0.3, 100, electron_mass, 0, 5, solver = 1, energy = True, hamiltonian = True)
     #plt.show()
     #print(findxExpectationValue(square_well,-0.3,0.3,500,electron_mass,0,5,1))
     #print(findxExpectationValue(square_well,-0.3,0.3,500,electron_mass,0,5,2))
-    print(findpExpectationValue(square_well,-0.3,0.3,5,electron_mass,0,5,1))
-    print(findpExpectationValue(square_well,-0.3,0.3,5,electron_mass,0,5,2))
+    #print(findpExpectationValue(square_well,-0.3,0.3,5,electron_mass,0,5,1))
+    #print(findpExpectationValue(square_well,-0.3,0.3,5,electron_mass,0,5,2))
 
     #run(square_well,-0.1,0.1,100,electron_mass,0,5)
     #plt.show()
 
-    xPlotter(square_well,1)
-    xPlotter(square_well,2)
-    xPlotter(square_well,2,rms=True)
-    pPlotter(square_well,1)
-    pPlotter(square_well,2)
-    pPlotter(square_well,2,rms=True)
+    #xPlotter(square_well,1)
+    #xPlotter(square_well,2)
+    #xPlotter(square_well,2,rms=True)
+    #pPlotter(square_well,1)
+    #pPlotter(square_well,2)
+    #pPlotter(square_well,2,rms=True)
 
-    xPlotter(ho,1) 
-    xPlotter(ho,2)  
-    xPlotter(ho,2,rms=True)
-    pPlotter(ho,1)
-    pPlotter(ho,2)
-    pPlotter(ho,2,rms=True)
+    #xPlotter(ho,1) 
+    #xPlotter(ho,2)  
+    #xPlotter(ho,2,rms=True)
+    #pPlotter(ho,1)
+    #pPlotter(ho,2)
+    #pPlotter(ho,2,rms=True)
+
+    #xPlotter(trig,1)
+    #xPlotter(trig,2)
+    #xPlotter(trig,2,rms=True)
+    pPlotter(trig,1)
+    #pPlotter(trig,2)
+    #pPlotter(trig,2,rms=True)
 
 
 
