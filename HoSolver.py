@@ -228,13 +228,14 @@ class Ho_Solver:
     def expectation_momentum2(self):
         """
         Calculates the expectation value of the momentum squared for an eigenvecor in the solver basis.
+        p^2 = -(hbar*m*omega/2)*(a_+*a_+ - a_+*a_- - a_-*a_+ + a_-*a_-)
         """
         #WRITE MOMENTUM IN TERMS OF THIS (MAKE THIS THE CONDITIONAL STATEMENTS IN MOMENTUM HERE AND CALL THIS IN MOMENTUM)
         self.mom2_exp = np.zeros((self.n_functions, self.n_functions))
         
         for i in range(0,self.n_functions):
             for j in range(0, self.n_functions):
-                self.mom2_exp[i][j]  = np.abs(self.momentum_operator_term(i,j))
+                self.mom2_exp[i][j]  = self.momentum_operator_term(i,j)
                 
         self.mom2_exp = self.mom2_exp * (2*self.mass)
         
