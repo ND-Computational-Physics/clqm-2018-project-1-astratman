@@ -402,7 +402,7 @@ if __name__ == "__main__":
     #xPlotter(trig,1)
     #xPlotter(trig,2)
     #xPlotter(trig,2,rms=True)
-    pPlotter(trig,1)
+    #pPlotter(trig,1)
     #pPlotter(trig,2)
     #pPlotter(trig,2,rms=True)
 

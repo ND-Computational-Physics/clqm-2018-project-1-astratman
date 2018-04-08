@@ -635,13 +635,16 @@ if __name__ == "__main__":
     
     #These two diverge->
     #plotty_mcplotface(ho,9)
-    plotty_mcplotface(ho,9)
+    #plotty_mcplotface(ho,1)
+    #plotty_mcplotface(ho,3)
+    #plotty_mcplotface(ho,9)
+    #plotty_mcplotface(ho,10)
     
     #Plots for the Perturbed Harmonic Oscillator Potential:
-    #plotty_mcplotface(bump,5)
-    #plotty_mcplotface(bump,6)
+    #plotty_mcplotface(bump,1)
+    #plotty_mcplotface(bump,3)
     #plotty_mcplotface(bump,9)
-    #plotty_mcplotface(bump,10)
+    plotty_mcplotface(bump,10)
     
     plt.legend(loc = 'best')
     plt.show()
