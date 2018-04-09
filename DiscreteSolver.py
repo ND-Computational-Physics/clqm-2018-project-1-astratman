@@ -96,8 +96,9 @@ class Discrete_Solver:
         self.column_eigenvectors = np.transpose(self.row_eigenvectors)
 
     def xExpecValMatrix(self):
-        #Padded with zeros
-        #xPoints has dimensions n_steps+1
+        """
+        Creates matrices for finding the expectation values of position and position squared
+        """
         self.positionMatrix = np.zeros((self.n_steps+1,self.n_steps+1))
         for i in range(1,self.n_steps):
             for j in range(1,self.n_steps):
@@ -113,10 +114,16 @@ class Discrete_Solver:
                 self.positionMatrix[x_index][x_index] = self.h * position**2 * self.positionMatrix[x_index][x_index]
 
     def calcxExpecVal(self):
+        """
+        Calculates the expectation value of position or position squared by taking an inner product using matrix multiplication
+        """
         working_matrix = np.dot(self.positionMatrix,self.column_eigenvectors)
         self.xExpecVal = np.dot(self.row_eigenvectors,working_matrix)
 
     def momentumElementFinder1(self,i,j):
+        """
+        Finds the elements in the matrix used to calculate the expectation value of the momentum
+        """
         if i == j:
             Element = 1j/self.h
         elif i + 1 == j:
@@ -126,6 +133,9 @@ class Discrete_Solver:
         return Element
 
     def momentumElementFinder2(self,i,j):
+        """
+        Finds the elements in the matrix used to calculate the expectation value of the momentum squared
+        """
         if i == j:
             Element = 2/(self.h**2)
         elif i == j + 1:
@@ -137,7 +147,9 @@ class Discrete_Solver:
         return Element
 
     def pExpecValMatrix(self):
-        #Padded with zeros
+        """
+        Creates matrices for finding the expectation values of momentum and momentum squared
+        """
         self.momentumMatrix = np.zeros((self.n_steps+1,self.n_steps+1),dtype=np.complex)
         if self.operator == 1:
             for i in range(1,self.n_steps):
@@ -148,14 +160,11 @@ class Discrete_Solver:
                 for j in range(1,self.n_steps):
                     if i == j:
                         self.momentumMatrix[i][j] = self.h**3 * self.momentumElementFinder2(i,j)
-            #for i in range(len(self.xPoints)):
-                #x_index = i
-                #position = self.xPoints[x_index]
-                #Check this - find KE terms by subtracting potential from diagonal elements of Hamiltonian
-                #then find momentum terms by multiplying by 2m (KE = p^2/2m)
-                #self.momentumMatrix[x_index][x_index] = 2*self.mass*(self.hamiltonian[x_index][x_index] - self.potential(position))
 
     def calcpExpecVal(self):
+        """
+        Calculates the expectation value of momentum or momentum squared by taking an inner product using matrix multiplication
+        """
         working_matrix = np.matmul(self.momentumMatrix,self.column_eigenvectors)
         self.pExpecVal = np.matmul(self.row_eigenvectors,working_matrix)
 
@@ -284,6 +293,10 @@ def run(p_function, xmin, xmax, dim, mass, n, m, operator = None, energy = None,
         nrg_plot(potential, solver, n, m, energy)
 
 def findxExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
+    """
+    Solves the Schrodinger equation for a given potential, then
+    finds the expectation value of position or position squared corresponding to those eigenfunctions
+    """
     potential = Discrete_Solver(p_function, xmin, xmax, dim, mass, operator)
     potential.matrix_maker()
     potential.matrix_solver()
@@ -292,6 +305,10 @@ def findxExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
     return potential.xExpecVal
 
 def findpExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
+    """
+    Solves the Schrodinger equation for a given potential, then
+    finds the expectation value of momentum or momentum squared corresponding to those eigenfunctions
+    """
     potential = Discrete_Solver(p_function, xmin, xmax, dim, mass, operator)
     potential.matrix_maker()
     potential.matrix_solver()
@@ -300,6 +317,10 @@ def findpExpectationValue(p_function, xmin, xmax, dim, mass, n, m, operator):
     return potential.pExpecVal
 
 def xPlotter(potential,operator,rms=False):
+    """
+    Plots the expectation value of position or position squared vs. the number of steps used to
+    solve the Schrodinger equation for a given potential
+    """
     electron_mass = 511
     xValues = []
     nValues = []
@@ -326,6 +347,11 @@ def xPlotter(potential,operator,rms=False):
     plt.show()
 
 def pPlotter(potential,operator,rms=False):
+    xPlotter(potential,operator,rms=False):
+    """
+    Plots the expectation value of momentum or momentum squared vs. the number of steps used to
+    solve the Schrodinger equation for a given potential
+    """
     electron_mass = 511
     pValues = []
     nValues = []
