@@ -328,7 +328,7 @@ def xPlotter(potential,operator,rms=False):
         nValues.append(n)
         xVal = findxExpectationValue(potential,-1,1,n,electron_mass,0,10,operator)
         if rms == False:
-            xValues.append(xVal[0][0])
+            xValues.append(xVal[2][0])
         elif rms == True:
             xValues.append(np.sqrt(xVal[0][0]))
     plt.plot(nValues,xValues)
@@ -338,16 +338,15 @@ def xPlotter(potential,operator,rms=False):
     elif rms == True:
         plt.ylabel("RMS Value")
     if operator == 1:
-        plt.title("Expectation Value of Position for Ground State",y=1.05)
+        plt.title("Matrix Elements for n=1 to n=0",y=1.05)
     elif operator == 2:
         if rms == False:
-            plt.title("Expectation Value of Position Squared for Ground State",y=1.05)
+            plt.title("Matrix Elements for n=2 to n=0",y=1.05)
         else:
             plt.title("RMS Position for Ground State",y=1.05)
     plt.show()
 
 def pPlotter(potential,operator,rms=False):
-    xPlotter(potential,operator,rms=False):
     """
     Plots the expectation value of momentum or momentum squared vs. the number of steps used to
     solve the Schrodinger equation for a given potential
@@ -426,7 +425,7 @@ if __name__ == "__main__":
     #pPlotter(ho,2,rms=True)
 
     #xPlotter(trig,1)
-    #xPlotter(trig,2)
+    xPlotter(trig,2)
     #xPlotter(trig,2,rms=True)
     #pPlotter(trig,1)
     #pPlotter(trig,2)

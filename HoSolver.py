@@ -631,7 +631,7 @@ if __name__ == "__main__":
     #Plots for the Harmonic Oscillator Potential:
     #These two converge, but do encounter negative values? ->
     #plotty_mcplotface(ho,5)
-    #plotty_mcplotface(ho,6)
+    plotty_mcplotface(ho,6)
     
     #These two diverge->
     #plotty_mcplotface(ho,9)
@@ -644,7 +644,7 @@ if __name__ == "__main__":
     #plotty_mcplotface(bump,1)
     #plotty_mcplotface(bump,3)
     #plotty_mcplotface(bump,9)
-    plotty_mcplotface(bump,10)
+    #plotty_mcplotface(bump,10)
     
     plt.legend(loc = 'best')
     plt.show()
